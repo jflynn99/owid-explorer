@@ -17,7 +17,7 @@ export default function HomePage() {
       <h1 className="text-center text-3xl font-bold tracking-tight">
         Explore Our World in Data
       </h1>
-      <p className="mt-3 max-w-xl text-center text-gray-500">
+      <p className="mt-3 max-w-xl text-center text-gray-500 dark:text-slate-400">
         Search thousands of charts, pick countries and time ranges, and share the
         link. Every chart carries OWID&apos;s citations.
       </p>
@@ -25,7 +25,7 @@ export default function HomePage() {
         <SearchBox autoFocus />
       </div>
 
-      <h2 className="mt-14 self-start text-sm font-semibold uppercase tracking-wide text-gray-400">
+      <h2 className="mt-14 self-start text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">
         Featured charts
       </h2>
       <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -33,10 +33,10 @@ export default function HomePage() {
           <Link
             key={c.slug}
             href={`/chart/${c.slug}`}
-            className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-blue-300 hover:shadow"
+            className="rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition hover:border-blue-300 dark:hover:border-blue-700 hover:shadow"
           >
             <span className="font-medium">{c.title}</span>
-            <span className="mt-1 block text-xs text-gray-400">/{c.slug}</span>
+            <span className="mt-1 block text-xs text-gray-400 dark:text-slate-500">/{c.slug}</span>
           </Link>
         ))}
       </div>

@@ -76,24 +76,24 @@ export default function ChartControls({
         <button
           type="button"
           onClick={() => setPickerOpen((v) => !v)}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm shadow-sm hover:bg-gray-50"
+          className="rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
         >
           Countries ({selectedCodes.length}) ▾
         </button>
         {pickerOpen && (
-          <div className="absolute z-20 mt-1 w-72 rounded-lg border border-gray-200 bg-white p-2 shadow-lg">
+          <div className="absolute z-20 mt-1 w-72 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-lg">
             <input
               type="search"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter…"
-              className="mb-2 w-full rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none"
+              className="mb-2 w-full rounded border border-gray-300 dark:border-slate-700 px-2 py-1 text-sm focus:outline-none"
             />
             <ul className="max-h-64 overflow-auto">
-              {!available && <li className="px-2 py-1 text-sm text-gray-400">Loading…</li>}
+              {!available && <li className="px-2 py-1 text-sm text-gray-400 dark:text-slate-500">Loading…</li>}
               {filtered.map((e) => (
                 <li key={e.code}>
-                  <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-blue-50">
+                  <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-blue-50 dark:hover:bg-slate-800">
                     <input
                       type="checkbox"
                       checked={selectedCodes.includes(e.code)}
@@ -109,24 +109,24 @@ export default function ChartControls({
       </div>
 
       <div className="flex items-center gap-2 text-sm">
-        <label className="text-gray-500">From</label>
+        <label className="text-gray-500 dark:text-slate-400">From</label>
         <input
           type="number"
           value={years[0]}
           onChange={(e) => setYears([e.target.value, years[1]])}
-          className="w-20 rounded border border-gray-300 px-2 py-1.5 shadow-sm"
+          className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm"
         />
-        <label className="text-gray-500">to</label>
+        <label className="text-gray-500 dark:text-slate-400">to</label>
         <input
           type="number"
           value={years[1]}
           onChange={(e) => setYears([years[0], e.target.value])}
-          className="w-20 rounded border border-gray-300 px-2 py-1.5 shadow-sm"
+          className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm"
         />
         <button
           type="button"
           onClick={applyTime}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 shadow-sm hover:bg-gray-50"
+          className="rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
         >
           Apply
         </button>

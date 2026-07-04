@@ -59,12 +59,12 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
 
   if (saved) {
     return (
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm">
-        <span className="text-gray-600">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-sm">
+        <span className="text-gray-600 dark:text-slate-300">
           Using your <span className="font-medium">{saved.provider}</span> key (stored in this
           browser only)
         </span>
-        <button type="button" onClick={clear} className="text-xs text-gray-400 hover:text-red-600">
+        <button type="button" onClick={clear} className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400">
           Remove key
         </button>
       </div>
@@ -72,9 +72,9 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
       <h3 className="text-sm font-semibold">Add an API key to enable the agent</h3>
-      <p className="mt-1 text-xs text-gray-500">
+      <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
         Your key is stored in this browser&apos;s localStorage and sent only with your own chat
         requests. It is used in-memory on the server and never logged or persisted.
       </p>
@@ -82,7 +82,7 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
         <select
           value={provider}
           onChange={(e) => setProvider(e.target.value as LlmConfig["provider"])}
-          className="rounded border border-gray-300 px-2 py-1.5 text-sm"
+          className="rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 text-sm"
           aria-label="LLM provider"
         >
           <option value="anthropic">Anthropic</option>
@@ -93,7 +93,7 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
           value={key}
           onChange={(e) => setKey(e.target.value)}
           placeholder={provider === "anthropic" ? "sk-ant-…" : "sk-…"}
-          className="min-w-64 flex-1 rounded border border-gray-300 px-2 py-1.5 text-sm"
+          className="min-w-64 flex-1 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 text-sm"
           aria-label="API key"
         />
         <button
@@ -105,7 +105,7 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
           Save
         </button>
       </div>
-      <p className="mt-2 text-xs text-gray-400">
+      <p className="mt-2 text-xs text-gray-400 dark:text-slate-500">
         Running your own fork? Set <code>LLM_PROVIDER</code> in <code>.env</code> instead —
         including Ollama for fully local use.
       </p>

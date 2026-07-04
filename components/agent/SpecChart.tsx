@@ -81,22 +81,22 @@ export default function SpecChart({ spec: rawSpec }: { spec: unknown }) {
   }, [JSON.stringify(rawSpec)]);
 
   if (!spec) return null;
-  if (error) return <p className="text-sm text-red-600">{error}</p>;
+  if (error) return <p className="text-sm text-red-600 dark:text-red-400">{error}</p>;
   if (!loaded) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-xl border border-gray-200 bg-white text-sm text-gray-400">
+      <div className="flex h-48 items-center justify-center rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-gray-400 dark:text-slate-500">
         Loading chart…
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-semibold">{spec.title}</h3>
         <Link
           href={`/overlay?s=${encodeSpec(spec)}`}
-          className="shrink-0 text-xs text-blue-600 hover:underline"
+          className="shrink-0 text-xs text-blue-600 dark:text-blue-400 hover:underline"
         >
           Open in overlay builder →
         </Link>

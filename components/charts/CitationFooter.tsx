@@ -10,12 +10,12 @@ export default function CitationFooter({
   originalChartUrl?: string;
 }) {
   return (
-    <footer className="mt-4 border-t border-gray-200 pt-3 text-xs text-gray-500">
+    <footer className="mt-4 border-t border-gray-200 dark:border-slate-800 pt-3 text-xs text-gray-500 dark:text-slate-400">
       {columns.map((col) => (
         <div key={col.shortName} className="mb-2">
-          {col.descriptionShort && <p className="mb-1 text-gray-600">{col.descriptionShort}</p>}
+          {col.descriptionShort && <p className="mb-1 text-gray-600 dark:text-slate-300">{col.descriptionShort}</p>}
           <p>
-            <span className="font-medium text-gray-600">Source:</span> {col.citationShort}
+            <span className="font-medium text-gray-600 dark:text-slate-300">Source:</span> {col.citationShort}
             {col.unit && <> · Unit: {col.unit}</>}
             {col.timespan && <> · {col.timespan}</>}
           </p>
@@ -24,7 +24,7 @@ export default function CitationFooter({
       <p>
         Data:{" "}
         {originalChartUrl ? (
-          <a href={originalChartUrl} className="underline hover:text-gray-700" target="_blank" rel="noopener noreferrer">
+          <a href={originalChartUrl} className="underline hover:text-gray-700 dark:hover:text-slate-200" target="_blank" rel="noopener noreferrer">
             Our World in Data
           </a>
         ) : (

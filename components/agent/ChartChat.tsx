@@ -90,9 +90,9 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
   // Nothing to offer: no server key configured and no personal key saved.
   if (unavailable) {
     return (
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-500 shadow-sm">
+      <div className="mt-6 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-sm text-gray-500 dark:text-slate-400 shadow-sm">
         Want to ask questions about this chart?{" "}
-        <Link href="/agent" className="text-blue-600 hover:underline">
+        <Link href="/agent" className="text-blue-600 dark:text-blue-400 hover:underline">
           Add your own API key on the Agent page
         </Link>{" "}
         to chat with the data.
@@ -101,10 +101,10 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
   }
 
   return (
-    <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="mt-6 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold text-gray-900">Ask about this chart</h2>
-        <span className="text-xs text-gray-400">
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Ask about this chart</h2>
+        <span className="text-xs text-gray-400 dark:text-slate-500">
           {usingOwnKey
             ? `Using your ${config!.provider} key`
             : quota
@@ -112,7 +112,7 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
               : ""}
         </span>
       </div>
-      <p className="mt-1 text-xs text-gray-500">
+      <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
         Answers are grounded in this chart&apos;s data and OWID&apos;s own articles, with wider
         context from the model where it helps explain the &ldquo;why&rdquo;.
       </p>
@@ -125,7 +125,7 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
               type="button"
               disabled={!canChat || busy}
               onClick={() => submit(s)}
-              className="rounded-full border border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-600 hover:border-blue-300 hover:text-blue-700 disabled:opacity-50"
+              className="rounded-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-gray-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
             >
               {s}
             </button>
@@ -148,7 +148,7 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
                   {message.parts.map((part, i) => {
                     if (part.type === "text" && part.text.trim()) {
                       return (
-                        <p key={i} className="whitespace-pre-wrap text-sm text-gray-800">
+                        <p key={i} className="whitespace-pre-wrap text-sm text-gray-800 dark:text-slate-200">
                           {part.text}
                         </p>
                       );
@@ -157,7 +157,7 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
                       const output = part.output as { articles: ArticleRef[] };
                       if (!output.articles?.length) return null;
                       return (
-                        <p key={i} className="text-xs text-gray-400">
+                        <p key={i} className="text-xs text-gray-400 dark:text-slate-500">
                           Reading:{" "}
                           {output.articles.map((a, j) => (
                             <span key={a.url}>
@@ -166,7 +166,7 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
                                 href={a.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="underline hover:text-gray-600"
+                                className="underline hover:text-gray-600 dark:hover:text-slate-300"
                               >
                                 {a.title}
                               </a>
@@ -181,14 +181,14 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
               )}
             </div>
           ))}
-          {busy && <p className="text-xs text-gray-400">Thinking…</p>}
+          {busy && <p className="text-xs text-gray-400 dark:text-slate-500">Thinking…</p>}
         </div>
       )}
 
       {exhausted ? (
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-gray-500 dark:text-slate-400">
           You&apos;ve used today&apos;s free questions.{" "}
-          <Link href="/agent" className="text-blue-600 hover:underline">
+          <Link href="/agent" className="text-blue-600 dark:text-blue-400 hover:underline">
             Add your own API key on the Agent page
           </Link>{" "}
           to keep going — it stays in your browser.
@@ -206,7 +206,7 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
             onChange={(e) => setInput(e.target.value)}
             placeholder="Why did this rise? What happened in 1990? …"
             disabled={!canChat || busy}
-            className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50"
+            className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-slate-900"
           />
           <button
             type="submit"
@@ -219,7 +219,7 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
       )}
 
       {error && !exhausted && (
-        <p className="mt-2 text-sm text-red-600">
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
           That didn&apos;t work{error.message ? ` (${error.message})` : ""}. Try again, or ask on
           the{" "}
           <Link href="/agent" className="underline">

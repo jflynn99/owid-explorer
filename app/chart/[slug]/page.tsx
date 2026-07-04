@@ -58,7 +58,7 @@ export default async function ChartPage({ params, searchParams }: PageProps) {
     return (
       <div>
         <h1 className="text-2xl font-bold">{meta.chart.title}</h1>
-        <p className="mt-4 text-gray-500">
+        <p className="mt-4 text-gray-500 dark:text-slate-400">
           No data for this selection. Try different countries or a wider time range.
         </p>
       </div>
@@ -91,19 +91,19 @@ export default async function ChartPage({ params, searchParams }: PageProps) {
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-tight">{meta.chart.title}</h1>
-      {meta.chart.subtitle && <p className="mt-1 text-sm text-gray-500">{meta.chart.subtitle}</p>}
+      {meta.chart.subtitle && <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">{meta.chart.subtitle}</p>}
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <ChartControls slug={slug} selectedCodes={selectedCodes} timeRange={timeRange} />
         <Link
           href={`/overlay?s=${encodeSpec(spec)}`}
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
         >
           Compare with another series →
         </Link>
       </div>
 
-      <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="mt-4 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
         <ChartRenderer spec={spec} data={seriesData} columns={columnMeta} />
         <CitationFooter
           columns={Object.values(columnMeta)}

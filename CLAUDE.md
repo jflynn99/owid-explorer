@@ -30,6 +30,13 @@ summary.
 - ECharts via tree-shaken `echarts/core` and the in-repo `components/charts/EChart.tsx`
   wrapper. Do not add `echarts-for-react`.
 - Every chart shows `CitationFooter` (citationShort, unit, timespan, CC-BY note).
+- Line colour encodes the ENTITY, dash pattern encodes the SERIES
+  (`lib/chartColors.ts`) — the same country keeps one colour across overlaid
+  datasets. Don't hand out palette colours per line.
+- Dark mode is class-based Tailwind (`dark:` variants everywhere); the toggle
+  (`components/ThemeToggle.tsx`) owns the `dark` class on `<html>`, an inline
+  script in `app/layout.tsx` applies it pre-paint, and ECharts reads it via
+  `lib/useIsDark.ts` (CSS can't reach canvas).
 - Transforms are pure functions in `lib/transforms/` with tests. Log scale is an
   axis flag, not a transform. `perCapita` must refuse already-normalised units.
 - Proxy routes validate `slug` (`/^[a-z0-9-]+$/i`) before building upstream URLs.
