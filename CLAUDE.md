@@ -10,6 +10,8 @@ summary.
 - Phase 2 (overlays + transforms): done
 - Phase 3 (agent): done (BYO-key)
 - Phase 4 (publish): extracted to this standalone repo; README GIFs + blog post pending
+- Chart chat (SPEC.md §7a): done — "Ask about this chart" on chart pages,
+  server-funded with a signed-cookie daily quota; Agent page is BYO-key mode
 
 ## Context
 
@@ -37,6 +39,13 @@ summary.
   logged. Ollama config comes from env only, never client headers (SSRF).
 - Default models: `claude-haiku-4-5` (Anthropic), `gpt-4o-mini` (OpenAI);
   override with `LLM_MODEL`.
+- Chart chat (`/api/chart-chat`, `components/agent/ChartChat.tsx`): scoped to one
+  chart; context built server-side in `lib/agent/chartContext.ts` (≤12 series,
+  ≤40 downsampled points each). Server-funded via `resolveServerFunded()` — an
+  API key WITHOUT `LLM_PROVIDER` funds chart chat only; setting `LLM_PROVIDER`
+  would also make the full agent server-funded (don't, on public deploys).
+  Daily quota = HMAC-signed cookie (`lib/agent/quota.ts`), default 5/day
+  (`CHART_CHAT_DAILY_LIMIT`). A saved BYO key bypasses the quota.
 
 ## Verification
 

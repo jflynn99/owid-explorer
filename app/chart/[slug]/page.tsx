@@ -7,6 +7,7 @@ import { encodeSpec, seriesKey, type ChartSpec } from "@/lib/chartSpec";
 import ChartRenderer from "@/components/charts/ChartRenderer";
 import ChartControls from "@/components/charts/ChartControls";
 import CitationFooter from "@/components/charts/CitationFooter";
+import ChartChat from "@/components/agent/ChartChat";
 import type { ColumnMeta, EntitySeries } from "@/lib/owid/types";
 
 interface PageProps {
@@ -109,6 +110,8 @@ export default async function ChartPage({ params, searchParams }: PageProps) {
           originalChartUrl={meta.chart.originalChartUrl}
         />
       </div>
+
+      <ChartChat slug={slug} entities={selectedCodes} timeRange={timeRange} />
     </div>
   );
 }

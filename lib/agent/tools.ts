@@ -9,6 +9,29 @@ import { parseChartCsv } from "../owid/parse";
 import type { SearchChartResult, SearchPageResult } from "../owid/types";
 import { buildSeriesPreview } from "./preview";
 
+// OWID article retrieval — shared between the full agent (as explain_chart)
+// and the chart-page chat (as owid_articles).
+export const owidArticlesTool = tool({
+  description:
+    "Retrieve OWID's own articles (CC-BY) about a topic, to ground an explanation of a " +
+    "chart. Answer questions using these excerpts and cite each article by title + link.",
+  inputSchema: z.object({
+    query: z.string().describe("Topic of the chart/question, e.g. 'why renewables got cheaper'"),
+  }),
+  execute: async ({ query }) => {
+    const res = await searchOwid(query, "pages");
+    const articles = res.results
+      .filter((r): r is SearchPageResult => r.type !== "chart" && !!(r as SearchPageResult).url)
+      .slice(0, 4)
+      .map((r) => ({
+        title: r.title,
+        url: r.url!,
+        excerpt: (r.content ?? "").slice(0, 600),
+      }));
+    return { articles };
+  },
+});
+
 export const agentTools = {
   search_indicators: tool({
     description:
@@ -74,24 +97,5 @@ export const agentTools = {
     },
   }),
 
-  explain_chart: tool({
-    description:
-      "Retrieve OWID's own articles (CC-BY) about a topic, to ground an explanation of a " +
-      "chart. Answer questions using these excerpts and cite each article by title + link.",
-    inputSchema: z.object({
-      query: z.string().describe("Topic of the chart/question, e.g. 'why renewables got cheaper'"),
-    }),
-    execute: async ({ query }) => {
-      const res = await searchOwid(query, "pages");
-      const articles = res.results
-        .filter((r): r is SearchPageResult => r.type !== "chart" && !!(r as SearchPageResult).url)
-        .slice(0, 4)
-        .map((r) => ({
-          title: r.title,
-          url: r.url!,
-          excerpt: (r.content ?? "").slice(0, 600),
-        }));
-      return { articles };
-    },
-  }),
+  explain_chart: owidArticlesTool,
 };

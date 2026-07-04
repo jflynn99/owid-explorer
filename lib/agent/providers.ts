@@ -51,6 +51,23 @@ export function resolveProvider(
   return null;
 }
 
+// Server-funded chart chat: uses whichever key the deployment has, WITHOUT
+// requiring LLM_PROVIDER. On a hosted deployment, set only ANTHROPIC_API_KEY
+// (or OPENAI_API_KEY): the quota-limited chart chat runs on it, while the full
+// agent stays BYO-key because resolveProvider's server path needs LLM_PROVIDER.
+export function resolveServerFunded(env: ServerEnv = process.env): ProviderSelection | null {
+  if (env.ANTHROPIC_API_KEY) {
+    return { provider: "anthropic", apiKey: env.ANTHROPIC_API_KEY, source: "server" };
+  }
+  if (env.OPENAI_API_KEY) {
+    return { provider: "openai", apiKey: env.OPENAI_API_KEY, source: "server" };
+  }
+  if (env.LLM_PROVIDER?.toLowerCase() === "ollama") {
+    return { provider: "ollama", source: "server" };
+  }
+  return null;
+}
+
 // Default models: the tool-calling here is simple enough that small models
 // handle it, and it keeps everyone's costs down (SPEC.md §7).
 const DEFAULT_MODELS: Record<ProviderName, string> = {

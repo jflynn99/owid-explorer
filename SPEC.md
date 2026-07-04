@@ -253,7 +253,40 @@ Default model when Anthropic: `claude-haiku-4-5` — the tool-calling here is si
 enough that a small model handles it, and it keeps everyone's costs down.
 
 Optional later: server-funded "try it" mode, rate-limited (e.g. 10 requests/IP/day via
-Vercel KV counter). Not in v1.
+Vercel KV counter). Not in v1. **Superseded — shipped as chart chat, see §7a.**
+
+## 7a. Chart chat — "Ask about this chart" (added 2026-07-04)
+
+The differentiator: every `/chart/[slug]` page carries a chat panel scoped to that
+chart. Answers are grounded in the chart's actual data but may reach beyond it —
+the model explains "why" using OWID articles plus its general knowledge, with data
+facts and interpretation kept explicitly distinct in the prompt rules.
+
+Positioning: most users search and chat on the chart pages (server-funded, a few
+turns/day). The Agent page is the BYO-key power mode: unlimited, full
+search/compose/overlay agent.
+
+Mechanics:
+- `POST /api/chart-chat` with `{ slug, entities, timeRange, messages }`. The route
+  re-fetches metadata + filtered CSV server-side (24h cache) and inlines a compact
+  context into the system prompt: title, subtitle, per-column unit/timespan/
+  citation/description, per-series summary stats, and the real series downsampled
+  to ≤40 points each (≤12 series) so the model can quote actual values and years
+  (`lib/agent/chartContext.ts`).
+- One tool: `owid_articles` (shared implementation with the full agent's
+  `explain_chart`) for grounding "why" answers in OWID's own writing, cited by link.
+- **Provider split.** `resolveServerFunded()` uses `ANTHROPIC_API_KEY` /
+  `OPENAI_API_KEY` *without* requiring `LLM_PROVIDER`. The full agent's server path
+  still requires `LLM_PROVIDER`. So a hosted deployment sets only the API key:
+  chart chat runs server-funded, the Agent page stays BYO-key.
+- **Quota.** N free questions per visitor per UTC day (default 5,
+  `CHART_CHAT_DAILY_LIMIT`, 0 disables), tracked in an HMAC-signed cookie
+  (`lib/agent/quota.ts`) — zero infrastructure. Signing secret is
+  `CHAT_QUOTA_SECRET` or a hash derived from the API key. Clearing cookies resets
+  the count; acceptable for a demo, swap for a KV counter if abused. Exhausted →
+  429 and the panel points to the Agent page.
+- A visitor with a saved BYO key (same `x-llm-provider`/`x-llm-key` headers as
+  `/api/agent`) bypasses the quota; their key is used in-memory only, as ever.
 
 ## 8. Phases and acceptance criteria
 
