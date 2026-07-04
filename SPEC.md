@@ -257,22 +257,27 @@ Vercel KV counter). Not in v1. **Superseded — shipped as chart chat, see §7a.
 
 ## 7a. Chart chat — "Ask about this chart" (added 2026-07-04)
 
-The differentiator: every `/chart/[slug]` page carries a chat panel scoped to that
-chart. Answers are grounded in the chart's actual data but may reach beyond it —
-the model explains "why" using OWID articles plus its general knowledge, with data
-facts and interpretation kept explicitly distinct in the prompt rules.
+The differentiator: every `/chart/[slug]` page and the overlay builder carry a
+chat panel scoped to the chart(s) in view, presented as a free trial ("Free trial
+— no key needed"). Answers are grounded in the charts' actual data but may reach
+beyond it — the model explains "why" using OWID articles plus its general
+knowledge, with data facts and interpretation kept explicitly distinct in the
+prompt rules.
 
 Positioning: most users search and chat on the chart pages (server-funded, a few
 turns/day). The Agent page is the BYO-key power mode: unlimited, full
 search/compose/overlay agent.
 
 Mechanics:
-- `POST /api/chart-chat` with `{ slug, entities, timeRange, messages }`. The route
-  re-fetches metadata + filtered CSV server-side (24h cache) and inlines a compact
-  context into the system prompt: title, subtitle, per-column unit/timespan/
-  citation/description, per-series summary stats, and the real series downsampled
-  to ≤40 points each (≤12 series) so the model can quote actual values and years
-  (`lib/agent/chartContext.ts`).
+- `POST /api/chart-chat` with `{ series: [{slug, column?}], entities, timeRange,
+  transforms?, messages }` — a chart page sends one `{slug}`; the overlay builder
+  sends `{slug, column}` per series (≤4). The route re-fetches metadata + filtered
+  CSV server-side (24h cache) per unique slug and inlines a compact context into
+  the system prompt: title, subtitle, per-column unit/timespan/citation/
+  description, per-series summary stats, and the real series downsampled to ≤40
+  points each (≤12 series) so the model can quote actual values and years
+  (`lib/agent/chartContext.ts`). Multi-chart contexts add the correlation caveat;
+  active transforms are named, with a note that inlined values are raw.
 - One tool: `owid_articles` (shared implementation with the full agent's
   `explain_chart`) for grounding "why" answers in OWID's own writing, cited by link.
 - **Provider split.** `resolveServerFunded()` uses `ANTHROPIC_API_KEY` /

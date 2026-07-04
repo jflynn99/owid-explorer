@@ -111,7 +111,7 @@ export default async function ChartPage({ params, searchParams }: PageProps) {
         />
       </div>
 
-      <ChartChat slug={slug} entities={selectedCodes} timeRange={timeRange} />
+      <ChartChat series={[{ slug }]} entities={selectedCodes} timeRange={timeRange} />
     </div>
   );
 }

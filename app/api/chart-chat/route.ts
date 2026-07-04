@@ -16,7 +16,8 @@ import { convertToModelMessages, stepCountIs, streamText } from "ai";
 import { getModel, resolveProvider, resolveServerFunded } from "@/lib/agent/providers";
 import { owidArticlesTool } from "@/lib/agent/tools";
 import { chartChatSystemPrompt } from "@/lib/agent/prompts";
-import { buildChartContext } from "@/lib/agent/chartContext";
+import { buildChatContext, type ChartContextInput } from "@/lib/agent/chartContext";
+import { transformSchema } from "@/lib/chartSpec";
 import {
   QUOTA_COOKIE,
   dailyLimit,
@@ -31,10 +32,16 @@ import { parseChartCsv } from "@/lib/owid/parse";
 
 export const maxDuration = 60;
 
+// One entry per chart in view: a plain chart page sends a single {slug}
+// (all columns); the overlay builder sends {slug, column} per series.
 const bodySchema = z.object({
-  slug: z.string().max(200),
+  series: z
+    .array(z.object({ slug: z.string().max(200), column: z.string().max(200).optional() }))
+    .min(1)
+    .max(4),
   entities: z.array(z.string().max(100)).max(20).optional(),
   timeRange: z.tuple([z.number().int(), z.number().int()]).optional(),
+  transforms: z.array(transformSchema).max(4).optional(),
   messages: z.array(z.unknown()).min(1).max(24),
 });
 
@@ -62,8 +69,8 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
-  const { slug, entities, timeRange, messages } = parsed.data;
-  if (!isValidSlug(slug)) {
+  const { series, entities, timeRange, transforms, messages } = parsed.data;
+  if (!series.every((s) => isValidSlug(s.slug))) {
     return NextResponse.json({ error: "bad_slug" }, { status: 400 });
   }
 
@@ -102,11 +109,25 @@ export async function POST(req: NextRequest) {
 
   let context: string;
   try {
-    const [meta, csv] = await Promise.all([
-      fetchChartMetadata(slug),
-      fetchChartCsv(slug, { entities, timeRange }),
-    ]);
-    context = buildChartContext(meta, parseChartCsv(csv));
+    const uniqueSlugs = [...new Set(series.map((s) => s.slug))];
+    const bySlug = new Map(
+      await Promise.all(
+        uniqueSlugs.map(async (slug) => {
+          const [meta, csv] = await Promise.all([
+            fetchChartMetadata(slug),
+            fetchChartCsv(slug, { entities, timeRange }),
+          ]);
+          return [slug, { meta, data: parseChartCsv(csv) }] as const;
+        })
+      )
+    );
+    const charts: ChartContextInput[] = uniqueSlugs.map((slug) => ({
+      ...bySlug.get(slug)!,
+      onlyColumns: series
+        .filter((s) => s.slug === slug && s.column)
+        .map((s) => s.column!),
+    }));
+    context = buildChatContext(charts, transforms);
   } catch {
     return NextResponse.json({ error: "chart_not_found" }, { status: 404 });
   }

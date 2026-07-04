@@ -7,7 +7,7 @@ import {
   todayUtc,
   usedToday,
 } from "../lib/agent/quota";
-import { buildChartContext, downsamplePoints } from "../lib/agent/chartContext";
+import { buildChartContext, buildChatContext, downsamplePoints } from "../lib/agent/chartContext";
 import { resolveServerFunded } from "../lib/agent/providers";
 import { parseChartCsv } from "../lib/owid/parse";
 import type { GrapherMetadata } from "../lib/owid/types";
@@ -129,5 +129,49 @@ Japan,JPN,2020,84.6`;
     // downsampled raw data the model can quote
     expect(ctx).toContain("1950: 68.5");
     expect(ctx).toContain("2020: 84.6");
+  });
+
+  it("restricts to the overlay's referenced columns", () => {
+    const twoColCsv = `entity,code,year,life_expectancy,other_col
+United Kingdom,GBR,2020,80.4,1`;
+    const ctx = buildChartContext(meta, parseChartCsv(twoColCsv), ["life_expectancy"]);
+    expect(ctx).toContain("life_expectancy");
+    expect(ctx).not.toContain("other_col");
+  });
+});
+
+describe("buildChatContext (overlay)", () => {
+  const CSV_A = `entity,code,year,col_a
+United Kingdom,GBR,2000,1`;
+  const CSV_B = `entity,code,year,col_b
+United Kingdom,GBR,2000,2`;
+  const metaFor = (title: string) => ({
+    chart: { title, citation: "", originalChartUrl: "", selection: [] },
+    columns: {},
+  });
+
+  it("single chart: no overlay caveat", () => {
+    const ctx = buildChatContext([{ meta: metaFor("A"), data: parseChartCsv(CSV_A) }]);
+    expect(ctx).not.toContain("Correlation does not imply causation");
+    expect(ctx).not.toContain("Overlaid chart");
+  });
+
+  it("two charts: numbered blocks plus the correlation caveat", () => {
+    const ctx = buildChatContext([
+      { meta: metaFor("A"), data: parseChartCsv(CSV_A) },
+      { meta: metaFor("B"), data: parseChartCsv(CSV_B) },
+    ]);
+    expect(ctx).toContain("Overlaid chart 1 of 2");
+    expect(ctx).toContain("Overlaid chart 2 of 2");
+    expect(ctx).toContain("Correlation does not imply causation");
+  });
+
+  it("notes active transforms and that inlined values are raw", () => {
+    const ctx = buildChatContext(
+      [{ meta: metaFor("A"), data: parseChartCsv(CSV_A) }],
+      [{ kind: "indexTo100", baseYear: 1990 }, { kind: "perCapita" }]
+    );
+    expect(ctx).toContain("indexTo100 (base year 1990), perCapita");
+    expect(ctx).toContain("RAW untransformed data");
   });
 });

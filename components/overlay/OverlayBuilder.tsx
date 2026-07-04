@@ -18,6 +18,7 @@ import { seriesKey } from "@/lib/chartSpec";
 import type { ColumnMeta, EntitiesResponse, EntitySeries, GrapherMetadata } from "@/lib/owid/types";
 import ChartRenderer from "@/components/charts/ChartRenderer";
 import CitationFooter from "@/components/charts/CitationFooter";
+import ChartChat from "@/components/agent/ChartChat";
 import SearchBox from "@/components/search/SearchBox";
 
 interface Props {
@@ -202,6 +203,13 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
           <ChartRenderer spec={spec} data={data} columns={columns} population={population} />
           <CitationFooter columns={Object.values(columns)} />
         </div>
+
+        <ChartChat
+          series={spec.series.map((r) => ({ slug: r.slug, column: r.column }))}
+          entities={spec.entities}
+          timeRange={spec.timeRange}
+          transforms={spec.transforms}
+        />
       </div>
 
       <aside className="space-y-6">

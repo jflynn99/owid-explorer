@@ -1,20 +1,23 @@
 "use client";
 
-// "Ask about this chart" — the chat panel embedded on every chart page.
-// Runs on the site's own key with a small daily quota (signed cookie, see
-// /api/chart-chat); a visitor who has saved their own key on the Agent page
-// bypasses the quota via the same x-llm-* headers as the full agent.
+// "Ask about this chart" — the chat panel embedded on chart and overlay
+// pages. Runs free on the site's own key with a small daily quota (signed
+// cookie, see /api/chart-chat); a visitor who has saved their own key on the
+// Agent page bypasses the quota via the same x-llm-* headers as the full agent.
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import type { Transform } from "@/lib/chartSpec";
 import { loadLlmConfig } from "./KeyManager";
 
 interface ChartChatProps {
-  slug: string;
+  // One entry per chart in view; overlays pass {slug, column} per series
+  series: { slug: string; column?: string }[];
   entities: string[];
   timeRange: [number, number];
+  transforms?: Transform[];
 }
 
 interface QuotaInfo {
@@ -34,7 +37,13 @@ const SUGGESTIONS = [
   "What explains the differences between countries?",
 ];
 
-export default function ChartChat({ slug, entities, timeRange }: ChartChatProps) {
+const OVERLAY_SUGGESTIONS = [
+  "What does this chart show?",
+  "How are these two series related?",
+  "Why has this changed over time?",
+];
+
+export default function ChartChat({ series, entities, timeRange, transforms }: ChartChatProps) {
   const [config] = useState(() => loadLlmConfig());
   const [quota, setQuota] = useState<QuotaInfo | null>(null);
   const [input, setInput] = useState("");
@@ -48,18 +57,19 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
 
   useEffect(refreshQuota, [refreshQuota]);
 
-  const entitiesKey = entities.join("~");
+  // Primitive key so the memo survives parents passing fresh array literals
+  const viewKey = JSON.stringify({ series, entities, timeRange, transforms });
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chart-chat",
-        body: { slug, entities: entitiesKey.split("~").filter(Boolean), timeRange },
+        body: { series, entities, timeRange, transforms },
         headers: config
           ? { "x-llm-provider": config.provider, "x-llm-key": config.key }
           : undefined,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [slug, entitiesKey, timeRange[0], timeRange[1], config]
+    [viewKey, config]
   );
 
   const { messages, sendMessage, status, error } = useChat({
@@ -103,7 +113,14 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
   return (
     <div className="mt-6 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Ask about this chart</h2>
+        <div className="flex items-baseline gap-2">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Ask about this chart</h2>
+          {!usingOwnKey && (
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+              Free trial — no key needed
+            </span>
+          )}
+        </div>
         <span className="text-xs text-gray-400 dark:text-slate-500">
           {usingOwnKey
             ? `Using your ${config!.provider} key`
@@ -113,13 +130,14 @@ export default function ChartChat({ slug, entities, timeRange }: ChartChatProps)
         </span>
       </div>
       <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-        Answers are grounded in this chart&apos;s data and OWID&apos;s own articles, with wider
-        context from the model where it helps explain the &ldquo;why&rdquo;.
+        {usingOwnKey
+          ? "Answers are grounded in this chart's data and OWID's own articles, with wider context from the model where it helps explain the “why”."
+          : `Try it free — ${quota?.limit ?? "a few"} questions a day, on us. Answers are grounded in this chart's data and OWID's own articles, with wider context from the model where it helps explain the “why”.`}
       </p>
 
       {messages.length === 0 && !exhausted && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {SUGGESTIONS.map((s) => (
+          {(series.length > 1 ? OVERLAY_SUGGESTIONS : SUGGESTIONS).map((s) => (
             <button
               key={s}
               type="button"

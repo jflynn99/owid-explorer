@@ -46,9 +46,11 @@ summary.
   logged. Ollama config comes from env only, never client headers (SSRF).
 - Default models: `claude-haiku-4-5` (Anthropic), `gpt-4o-mini` (OpenAI);
   override with `LLM_MODEL`.
-- Chart chat (`/api/chart-chat`, `components/agent/ChartChat.tsx`): scoped to one
-  chart; context built server-side in `lib/agent/chartContext.ts` (≤12 series,
-  ≤40 downsampled points each). Server-funded via `resolveServerFunded()` — an
+- Chart chat (`/api/chart-chat`, `components/agent/ChartChat.tsx`): on chart AND
+  overlay pages, framed as a free trial. Body takes `series: [{slug, column?}]`
+  (≤4) plus optional transforms; context built server-side in
+  `lib/agent/chartContext.ts` (≤12 series, ≤40 downsampled points each), with
+  the correlation caveat on multi-chart contexts. Server-funded via `resolveServerFunded()` — an
   API key WITHOUT `LLM_PROVIDER` funds chart chat only; setting `LLM_PROVIDER`
   would also make the full agent server-funded (don't, on public deploys).
   Daily quota = HMAC-signed cookie (`lib/agent/quota.ts`), default 5/day
