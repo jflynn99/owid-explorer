@@ -111,10 +111,13 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
   }
 
   return (
-    <div className="mt-6 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+    <div className="mt-6 rounded-xl border border-blue-200 bg-gradient-to-b from-blue-50/70 to-white p-4 shadow-sm dark:border-blue-900/60 dark:from-blue-950/30 dark:to-slate-900">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="flex items-baseline gap-2">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Ask about this chart</h2>
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">
+            <span aria-hidden="true" className="text-blue-500 dark:text-blue-400">✦</span> Ask about
+            this chart
+          </h2>
           {!usingOwnKey && (
             <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
               Free trial — no key needed

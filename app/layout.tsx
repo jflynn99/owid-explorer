@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 // Applies the saved (or system) theme before first paint to avoid a light
 // flash. Must stay in sync with ThemeToggle's storage key.
@@ -14,7 +17,7 @@ export const metadata: Metadata = {
     template: "%s · OWID Explorer",
   },
   description:
-    "Explore, combine and explain Our World in Data — interactive charts, overlays, and an optional bring-your-own-LLM agent.",
+    "Explore, combine and explain Our World in Data — interactive charts, overlays, and free AI chat on every chart.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -23,8 +26,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
       </head>
-      <body className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 antialiased">
-        <header className="border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+      <body
+        className={`${inter.className} min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 antialiased`}
+      >
+        <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
             <div className="flex items-center gap-6">
               <Link href="/" className="text-lg font-semibold tracking-tight">
@@ -42,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 href="https://ourworldindata.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
+                className="hidden text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 sm:block"
               >
                 Data: Our World in Data
               </a>
@@ -51,9 +56,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
-        <footer className="mx-auto max-w-5xl px-4 pb-8 text-xs text-gray-400 dark:text-slate-500">
-          Charts rendered independently from OWID&apos;s public APIs. OWID content is CC BY;
-          underlying third-party data may carry its own terms.
+        <footer className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-6 text-xs text-gray-400 dark:border-slate-800 dark:text-slate-500">
+          <span>
+            Charts rendered independently from OWID&apos;s public APIs. OWID content is CC BY;
+            underlying third-party data may carry its own terms.
+          </span>
+          <a
+            href="https://github.com/jflynn99/owid-explorer"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-600 dark:hover:text-slate-300"
+          >
+            Open source on GitHub
+          </a>
         </footer>
         <Analytics />
       </body>
