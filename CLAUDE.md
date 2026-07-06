@@ -12,6 +12,11 @@ summary.
 - Phase 4 (publish): extracted to this standalone repo; README GIFs + blog post pending
 - Chart chat (SPEC.md §7a): done — "Ask about this chart" on chart pages,
   server-funded with a signed-cookie daily quota; Agent page is BYO-key mode
+- v3 (quality + agent depth, SPEC.md v3 section / WORKPLAN.md): done — markdown
+  rendering in both chats, error/loading boundaries, WCAG AA contrast + focus +
+  aria-live, mobile overlay builder (supersedes the SPEC §9 desktop-first
+  deferral), chat depth (live tool status, follow-ups, retry, stop), and
+  route-branch tests for /api/chart-chat
 
 ## Context
 
