@@ -353,3 +353,78 @@ Mechanics:
 11. Slug/param validation on proxy routes (they build upstream URLs).
 12. Phase 4 now explicitly includes extraction to a standalone repo (v1 build lives
     inside joeflynnpm.com as `owid-explorer/`).
+
+---
+
+## v3 — Quality hardening + agent depth (2026-07-06)
+
+v1/v2 shipped the features. v3 makes them bulletproof and sharpens the one true
+differentiator (chart chat, §7a). No new chart *types* — this is edge-hardening and
+chat depth only. Feature scope from §9 is unchanged **except** the mobile overlay
+builder, which is now **in** scope (see decision 4 below); §9's "builder can be
+desktop-first" line is superseded.
+
+The executable breakdown lives in `WORKPLAN.md` as six self-contained unit cards.
+This section records the *decisions* those cards depend on, made while the strongest
+model was available so execution stays mechanical.
+
+**Two tracks (chosen 2026-07-06): Quality & robustness, and agent/chat depth.**
+Explicitly *not* chosen: finishing Phase 4 packaging, and new chart capabilities
+(scatter, maps, extra transforms). Those stay parked.
+
+### Decisions
+
+1. **Markdown rendering is a shared component.** Both chat surfaces
+   (`ChartChat`, `ChatPanel`) currently render assistant text as a plain
+   `whitespace-pre-wrap` `<p>`, so the `[title](url)` citations both system prompts
+   demand (§6, §7a) render as literal source. One `components/agent/Markdown.tsx`
+   renders both. Sanitised allowlist only (links, emphasis, lists, code, line
+   breaks); external links forced to `target="_blank" rel="noopener noreferrer"`;
+   no raw HTML, no images. Dependency: `react-markdown` + `remark-gfm` +
+   `rehype-sanitize` with an explicit schema — hand-rolled markdown parsing is a
+   security footgun and is rejected. Prose styled with plain Tailwind classes (no
+   `@tailwindcss/typography` dependency).
+
+2. **Data-fetch failures degrade gracefully, they do not 500.** `app/` has no
+   `error.tsx`/`loading.tsx` anywhere, and the chart page's CSV fetch
+   (`app/chart/[slug]/page.tsx`, the `fetchChartCsv` after the metadata try/catch)
+   is unguarded — an OWID CSV outage after a metadata hit is an unhandled throw.
+   v3 adds route-level `loading.tsx` skeletons and `error.tsx` boundaries for
+   `/chart/[slug]` and `/overlay`, a global `app/error.tsx` + `app/not-found.tsx`,
+   and wraps the CSV fetch so a data failure renders an inline "couldn't load this
+   data" state with a route back to search — distinct from `notFound()` (chart
+   slug genuinely absent).
+
+3. **Accessibility target is WCAG 2.1 AA.** Known suspects: `text-gray-400` on
+   white as readable text (≈2.8:1, below the 4.5:1 AA floor) used across most
+   components; `focus:outline-none` with no replacement ring (e.g. the overlay
+   entity filter input); streamed answers not in an `aria-live` region so screen
+   readers never hear them. Fix by token swap + a shared focus-ring utility +
+   `aria-live="polite"`/`aria-busy` on the answer region. Verified with the
+   `design:accessibility-review` skill; target zero serious violations.
+
+4. **Mobile overlay builder is in scope (reverses §9).** Below `lg`, the builder's
+   right-hand `aside` becomes a collapsible controls panel above/below a
+   full-width chart; entity picker and number inputs go full-width; tap targets
+   ≥44px. Desktop layout at `lg+` is unchanged. Target viewport: 375px (Joe's
+   Pixel 9 is the reference device).
+
+5. **Chat depth builds on the markdown unit.** Live tool status while a tool runs
+   (not just post-hoc "Reading:"), follow-up suggestion chips that persist after
+   each answer (static per surface), retry-without-retyping on a failed send, and
+   a stop control during streaming. No new server capability — all client-side on
+   the existing `useChat` stream.
+
+6. **Grounding + tests are the downgrade-safe tail.** `downsamplePoints` guards
+   `maxPoints < 2`; quota codec and the chart-chat route's 400/401/404/429
+   branches get tests; the chart-chat prompt gains a "lead with the single most
+   striking data fact, keep interpretation labelled" rule. Pure wiring — safe to
+   hand to a weaker model.
+
+### Ordering principle
+
+Front-load judgement while the strongest model is available; leave rote wiring for
+last so any model downgrade lands only on mechanical units. Each unit ships
+independently behind its own `npm run build` + `npm test` gate — every unit
+boundary is a clean handoff seam. See `WORKPLAN.md` for the per-unit detail and the
+recommended sequence.
