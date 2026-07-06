@@ -52,8 +52,26 @@ export default async function ChartPage({ params, searchParams }: PageProps) {
         : undefined;
   const requestedTime = parseTimeParam(searchParams.time);
 
-  const csv = await fetchChartCsv(slug, { entities, timeRange: requestedTime });
-  const data = parseChartCsv(csv);
+  // Metadata succeeded (slug is real), but the data CSV can still fail on an OWID
+  // outage. Degrade to an inline retry state rather than throwing a 500.
+  let data: ReturnType<typeof parseChartCsv>;
+  try {
+    const csv = await fetchChartCsv(slug, { entities, timeRange: requestedTime });
+    data = parseChartCsv(csv);
+  } catch {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold">{meta.chart.title}</h1>
+        <p className="mt-4 text-gray-500 dark:text-slate-400">
+          Couldn&apos;t load this data from OWID right now. Please try again shortly.
+        </p>
+        <Link href="/" className="mt-4 inline-block text-sm text-blue-600 dark:text-blue-400 underline">
+          Back to search
+        </Link>
+      </div>
+    );
+  }
+
   if (data.rows.length === 0) {
     return (
       <div>
