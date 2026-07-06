@@ -18,6 +18,33 @@ interface ArticleRef {
   url: string;
 }
 
+// Suggestion chips, shown as an empty-state prompt and as follow-ups after answers.
+function SuggestionChips({
+  items,
+  onPick,
+  disabled,
+}: {
+  items: string[];
+  onPick: (s: string) => void;
+  disabled: boolean;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {items.map((s) => (
+        <button
+          key={s}
+          type="button"
+          disabled={disabled}
+          onClick={() => onPick(s)}
+          className="rounded-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-gray-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
+        >
+          {s}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function ChatPanel({ serverConfigured }: { serverConfigured: boolean }) {
   const [config, setConfig] = useState<LlmConfig | null>(() => loadLlmConfig());
   const [input, setInput] = useState("");
@@ -33,7 +60,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
     [config]
   );
 
-  const { messages, sendMessage, status, error } = useChat({ transport });
+  const { messages, sendMessage, status, error, stop, regenerate } = useChat({ transport });
   const canChat = serverConfigured || config !== null;
   const busy = status === "submitted" || status === "streaming";
 
@@ -55,19 +82,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
               Ask for any data OWID publishes — the agent finds it, combines it, renders a chart
               with citations, and can explain it using OWID&apos;s own articles.
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {SUGGESTIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  disabled={!canChat}
-                  onClick={() => submit(s)}
-                  className="rounded-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-gray-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+            <SuggestionChips items={SUGGESTIONS} onPick={submit} disabled={!canChat} />
           </div>
         )}
 
@@ -101,6 +116,16 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
                     const output = part.output as { ok: boolean };
                     return output.ok ? <SpecChart key={i} spec={part.input} /> : null;
                   }
+                  if (
+                    part.type === "tool-explain_chart" &&
+                    (part.state === "input-streaming" || part.state === "input-available")
+                  ) {
+                    return (
+                      <p key={i} className="text-xs text-gray-500 dark:text-slate-400">
+                        Reading OWID articles…
+                      </p>
+                    );
+                  }
                   if (part.type === "tool-explain_chart" && part.state === "output-available") {
                     const output = part.output as { articles: ArticleRef[] };
                     if (!output.articles?.length) return null;
@@ -130,11 +155,18 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
           </div>
         ))}
 
+        {messages.length > 0 && !busy && canChat && (
+          <SuggestionChips items={SUGGESTIONS} onPick={submit} disabled={busy} />
+        )}
+
         {busy && <p className="text-xs text-gray-500 dark:text-slate-400">Thinking…</p>}
         {error && (
           <p className="text-sm text-red-600 dark:text-red-400">
-            The agent request failed{error.message ? `: ${error.message}` : ""}. Check your key and
-            try again.
+            The agent request failed{error.message ? `: ${error.message}` : ""}.{" "}
+            <button type="button" onClick={() => regenerate()} className="font-medium underline">
+              Retry
+            </button>
+            , or check your key.
           </p>
         )}
       </div>
@@ -154,13 +186,23 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
           disabled={!canChat}
           className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 dark:disabled:bg-slate-900"
         />
-        <button
-          type="submit"
-          disabled={!canChat || busy || !input.trim()}
-          className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          Send
-        </button>
+        {busy ? (
+          <button
+            type="button"
+            onClick={() => stop()}
+            className="rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+          >
+            Stop
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={!canChat || !input.trim()}
+            className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            Send
+          </button>
+        )}
       </form>
     </div>
   );

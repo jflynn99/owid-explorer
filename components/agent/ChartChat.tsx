@@ -44,6 +44,34 @@ const OVERLAY_SUGGESTIONS = [
   "Why has this changed over time?",
 ];
 
+// Suggestion chips, shown both as an empty-state prompt and as follow-ups after
+// each answer.
+function SuggestionChips({
+  items,
+  onPick,
+  disabled,
+}: {
+  items: string[];
+  onPick: (s: string) => void;
+  disabled: boolean;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {items.map((s) => (
+        <button
+          key={s}
+          type="button"
+          disabled={disabled}
+          onClick={() => onPick(s)}
+          className="rounded-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-gray-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
+        >
+          {s}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function ChartChat({ series, entities, timeRange, transforms }: ChartChatProps) {
   const [config] = useState(() => loadLlmConfig());
   const [quota, setQuota] = useState<QuotaInfo | null>(null);
@@ -73,7 +101,7 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
     [viewKey, config]
   );
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, stop, regenerate } = useChat({
     transport,
     onFinish: () => {
       if (!config) refreshQuota();
@@ -140,19 +168,11 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
       </p>
 
       {messages.length === 0 && !exhausted && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {(series.length > 1 ? OVERLAY_SUGGESTIONS : SUGGESTIONS).map((s) => (
-            <button
-              key={s}
-              type="button"
-              disabled={!canChat || busy}
-              onClick={() => submit(s)}
-              className="rounded-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-gray-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        <SuggestionChips
+          items={series.length > 1 ? OVERLAY_SUGGESTIONS : SUGGESTIONS}
+          onPick={submit}
+          disabled={!canChat || busy}
+        />
       )}
 
       {messages.length > 0 && (
@@ -170,6 +190,16 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
                   {message.parts.map((part, i) => {
                     if (part.type === "text" && part.text.trim()) {
                       return <Markdown key={i}>{part.text}</Markdown>;
+                    }
+                    if (
+                      part.type === "tool-owid_articles" &&
+                      (part.state === "input-streaming" || part.state === "input-available")
+                    ) {
+                      return (
+                        <p key={i} className="text-xs text-gray-500 dark:text-slate-400">
+                          Searching OWID’s articles…
+                        </p>
+                      );
                     }
                     if (part.type === "tool-owid_articles" && part.state === "output-available") {
                       const output = part.output as { articles: ArticleRef[] };
@@ -203,6 +233,14 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
         </div>
       )}
 
+      {messages.length > 0 && !busy && canChat && !exhausted && (
+        <SuggestionChips
+          items={series.length > 1 ? OVERLAY_SUGGESTIONS : SUGGESTIONS}
+          onPick={submit}
+          disabled={busy}
+        />
+      )}
+
       {exhausted ? (
         <p className="mt-4 text-sm text-gray-500 dark:text-slate-400">
           You&apos;ve used today&apos;s free questions.{" "}
@@ -227,20 +265,33 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
             disabled={!canChat || busy}
             className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 dark:disabled:bg-slate-900"
           />
-          <button
-            type="submit"
-            disabled={!canChat || busy || !input.trim()}
-            className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            Ask
-          </button>
+          {busy ? (
+            <button
+              type="button"
+              onClick={() => stop()}
+              className="rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+            >
+              Stop
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!canChat || !input.trim()}
+              className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              Ask
+            </button>
+          )}
         </form>
       )}
 
       {error && !exhausted && (
         <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-          That didn&apos;t work{error.message ? ` (${error.message})` : ""}. Try again, or ask on
-          the{" "}
+          That didn&apos;t work{error.message ? ` (${error.message})` : ""}.{" "}
+          <button type="button" onClick={() => regenerate()} className="font-medium underline">
+            Retry
+          </button>
+          , or ask on the{" "}
           <Link href="/agent" className="underline">
             Agent page
           </Link>{" "}
