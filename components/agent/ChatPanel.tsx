@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import KeyManager, { loadLlmConfig, type LlmConfig } from "./KeyManager";
 import SpecChart from "./SpecChart";
+import Markdown from "./Markdown";
 
 const SUGGESTIONS = [
   "Show me renewable energy adoption vs GDP per capita in Germany",
@@ -82,11 +83,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
               <div className="space-y-3">
                 {message.parts.map((part, i) => {
                   if (part.type === "text" && part.text.trim()) {
-                    return (
-                      <p key={i} className="whitespace-pre-wrap text-sm text-gray-800 dark:text-slate-200">
-                        {part.text}
-                      </p>
-                    );
+                    return <Markdown key={i}>{part.text}</Markdown>;
                   }
                   if (part.type === "tool-search_indicators" || part.type === "tool-fetch_series") {
                     const label =

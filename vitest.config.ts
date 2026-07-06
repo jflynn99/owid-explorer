@@ -1,0 +1,7 @@
+import { defineConfig } from "vitest/config";
+
+// Match Next's automatic JSX runtime so component tests (e.g. the Markdown
+// renderer) don't need a React global. Pure-logic tests are unaffected.
+export default defineConfig({
+  esbuild: { jsx: "automatic" },
+});

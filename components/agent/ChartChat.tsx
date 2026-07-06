@@ -11,6 +11,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { Transform } from "@/lib/chartSpec";
 import { loadLlmConfig } from "./KeyManager";
+import Markdown from "./Markdown";
 
 interface ChartChatProps {
   // One entry per chart in view; overlays pass {slug, column} per series
@@ -168,11 +169,7 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
                 <div className="space-y-2">
                   {message.parts.map((part, i) => {
                     if (part.type === "text" && part.text.trim()) {
-                      return (
-                        <p key={i} className="whitespace-pre-wrap text-sm text-gray-800 dark:text-slate-200">
-                          {part.text}
-                        </p>
-                      );
+                      return <Markdown key={i}>{part.text}</Markdown>;
                     }
                     if (part.type === "tool-owid_articles" && part.state === "output-available") {
                       const output = part.output as { articles: ArticleRef[] };
