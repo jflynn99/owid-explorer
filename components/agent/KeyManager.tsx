@@ -64,7 +64,7 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
           Using your <span className="font-medium">{saved.provider}</span> key (stored in this
           browser only)
         </span>
-        <button type="button" onClick={clear} className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400">
+        <button type="button" onClick={clear} className="text-xs text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400">
           Remove key
         </button>
       </div>
@@ -105,7 +105,7 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
           Save
         </button>
       </div>
-      <p className="mt-2 text-xs text-gray-400 dark:text-slate-500">
+      <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">
         Running your own fork? Set <code>LLM_PROVIDER</code> in <code>.env</code> instead —
         including Ollama for fully local use.
       </p>

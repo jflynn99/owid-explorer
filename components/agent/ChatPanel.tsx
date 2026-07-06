@@ -48,7 +48,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
       {!serverConfigured && <KeyManager onChange={setConfig} />}
 
-      <div className="min-h-64 space-y-4">
+      <div className="min-h-64 space-y-4" role="log" aria-live="polite" aria-busy={busy}>
         {messages.length === 0 && (
           <div className="pt-4">
             <p className="text-sm text-gray-500 dark:text-slate-400">
@@ -89,7 +89,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
                     const label =
                       part.type === "tool-search_indicators" ? "Searching OWID" : "Checking data";
                     return (
-                      <p key={i} className="text-xs text-gray-400 dark:text-slate-500">
+                      <p key={i} className="text-xs text-gray-500 dark:text-slate-400">
                         {label}
                         {"input" in part && part.input
                           ? `: ${JSON.stringify((part.input as { query?: string; slug?: string }).query ?? (part.input as { slug?: string }).slug ?? "")}`
@@ -105,7 +105,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
                     const output = part.output as { articles: ArticleRef[] };
                     if (!output.articles?.length) return null;
                     return (
-                      <p key={i} className="text-xs text-gray-400 dark:text-slate-500">
+                      <p key={i} className="text-xs text-gray-500 dark:text-slate-400">
                         Reading:{" "}
                         {output.articles.map((a, j) => (
                           <span key={a.url}>
@@ -130,7 +130,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
           </div>
         ))}
 
-        {busy && <p className="text-xs text-gray-400 dark:text-slate-500">Thinking…</p>}
+        {busy && <p className="text-xs text-gray-500 dark:text-slate-400">Thinking…</p>}
         {error && (
           <p className="text-sm text-red-600 dark:text-red-400">
             The agent request failed{error.message ? `: ${error.message}` : ""}. Check your key and
@@ -150,8 +150,9 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={canChat ? "Ask about any OWID data…" : "Add a key above to enable the agent"}
+          aria-label="Ask about any OWID data"
           disabled={!canChat}
-          className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-slate-900"
+          className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 dark:disabled:bg-slate-900"
         />
         <button
           type="submit"

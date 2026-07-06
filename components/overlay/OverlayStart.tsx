@@ -62,7 +62,7 @@ export default function OverlayStart() {
       <div className="mt-6 w-full max-w-xl">
         <SearchBox autoFocus placeholder="Search for the first series…" onSelect={(r) => start(r.slug)} />
       </div>
-      {loading && <p className="mt-3 text-sm text-gray-400 dark:text-slate-500">Loading chart…</p>}
+      {loading && <p className="mt-3 text-sm text-gray-500 dark:text-slate-400">Loading chart…</p>}
       {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );

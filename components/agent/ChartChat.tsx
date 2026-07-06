@@ -125,7 +125,7 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
             </span>
           )}
         </div>
-        <span className="text-xs text-gray-400 dark:text-slate-500">
+        <span className="text-xs text-gray-500 dark:text-slate-400">
           {usingOwnKey
             ? `Using your ${config!.provider} key`
             : quota
@@ -156,7 +156,7 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
       )}
 
       {messages.length > 0 && (
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-3" role="log" aria-live="polite" aria-busy={busy}>
           {messages.map((message) => (
             <div key={message.id}>
               {message.role === "user" ? (
@@ -175,7 +175,7 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
                       const output = part.output as { articles: ArticleRef[] };
                       if (!output.articles?.length) return null;
                       return (
-                        <p key={i} className="text-xs text-gray-400 dark:text-slate-500">
+                        <p key={i} className="text-xs text-gray-500 dark:text-slate-400">
                           Reading:{" "}
                           {output.articles.map((a, j) => (
                             <span key={a.url}>
@@ -199,7 +199,7 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
               )}
             </div>
           ))}
-          {busy && <p className="text-xs text-gray-400 dark:text-slate-500">Thinking…</p>}
+          {busy && <p className="text-xs text-gray-500 dark:text-slate-400">Thinking…</p>}
         </div>
       )}
 
@@ -223,8 +223,9 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Why did this rise? What happened in 1990? …"
+            aria-label="Ask about this chart"
             disabled={!canChat || busy}
-            className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-slate-900"
+            className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 dark:disabled:bg-slate-900"
           />
           <button
             type="submit"

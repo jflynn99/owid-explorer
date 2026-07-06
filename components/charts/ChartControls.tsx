@@ -87,10 +87,11 @@ export default function ChartControls({
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter…"
-              className="mb-2 w-full rounded border border-gray-300 dark:border-slate-700 px-2 py-1 text-sm focus:outline-none"
+              aria-label="Filter countries"
+              className="mb-2 w-full rounded border border-gray-300 dark:border-slate-700 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <ul className="max-h-64 overflow-auto">
-              {!available && <li className="px-2 py-1 text-sm text-gray-400 dark:text-slate-500">Loading…</li>}
+              {!available && <li className="px-2 py-1 text-sm text-gray-500 dark:text-slate-400">Loading…</li>}
               {filtered.map((e) => (
                 <li key={e.code}>
                   <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-blue-50 dark:hover:bg-slate-800">
@@ -114,14 +115,16 @@ export default function ChartControls({
           type="number"
           value={years[0]}
           onChange={(e) => setYears([e.target.value, years[1]])}
-          className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm"
+          aria-label="From year"
+          className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <label className="text-gray-500 dark:text-slate-400">to</label>
         <input
           type="number"
           value={years[1]}
           onChange={(e) => setYears([years[0], e.target.value])}
-          className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm"
+          aria-label="To year"
+          className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <button
           type="button"

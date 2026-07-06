@@ -69,21 +69,22 @@ export default function SearchBox({
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => results.length > 0 && setOpen(true)}
         placeholder={placeholder ?? "Search OWID charts — try “life expectancy”"}
-        className="w-full rounded-lg border border-gray-300 dark:border-slate-700 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none"
+        aria-label="Search OWID charts"
+        className="w-full rounded-lg border border-gray-300 dark:border-slate-700 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
       />
       {open && (
         <ul className="absolute z-10 mt-1 max-h-96 w-full overflow-auto rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg">
           {loading && results.length === 0 && (
-            <li className="px-4 py-2 text-sm text-gray-400 dark:text-slate-500">Searching…</li>
+            <li className="px-4 py-2 text-sm text-gray-500 dark:text-slate-400">Searching…</li>
           )}
           {!loading && results.length === 0 && (
-            <li className="px-4 py-2 text-sm text-gray-400 dark:text-slate-500">No charts found</li>
+            <li className="px-4 py-2 text-sm text-gray-500 dark:text-slate-400">No charts found</li>
           )}
           {results.map((r) => {
             const label = (
               <>
                 <span className="font-medium">{r.title}</span>
-                {r.variantName && <span className="ml-1 text-gray-400 dark:text-slate-500">({r.variantName})</span>}
+                {r.variantName && <span className="ml-1 text-gray-500 dark:text-slate-400">({r.variantName})</span>}
               </>
             );
             return (

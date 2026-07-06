@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
-        <footer className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-6 text-xs text-gray-400 dark:border-slate-800 dark:text-slate-500">
+        <footer className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-6 text-xs text-gray-500 dark:border-slate-800 dark:text-slate-400">
           <span>
             Charts rendered independently from OWID&apos;s public APIs. OWID content is CC BY;
             underlying third-party data may carry its own terms.

@@ -88,7 +88,7 @@ export default async function HomePage() {
         ))}
       </div>
 
-      <h2 className="mt-14 self-start text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">
+      <h2 className="mt-14 self-start text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
         Featured charts
       </h2>
       <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -101,11 +101,11 @@ export default async function HomePage() {
             <span className="font-medium text-gray-900 group-hover:text-blue-700 dark:text-slate-100 dark:group-hover:text-blue-300">
               {c.title}
             </span>
-            <span className="mt-1 block text-xs text-gray-400 dark:text-slate-500">{c.blurb}</span>
+            <span className="mt-1 block text-xs text-gray-500 dark:text-slate-400">{c.blurb}</span>
             {sparklines[i] && (
               <span className="mt-3 block">
                 <Sparkline points={sparklines[i]!} />
-                <span className="mt-1 block text-[10px] text-gray-300 dark:text-slate-600">
+                <span className="mt-1 block text-[10px] text-gray-500 dark:text-slate-400">
                   World, {sparklines[i]![0][0]}–{sparklines[i]![sparklines[i]!.length - 1][0]}
                 </span>
               </span>
