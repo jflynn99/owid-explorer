@@ -47,6 +47,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
     String(spec.timeRange[1]),
   ]);
   const [addError, setAddError] = useState<string | null>(null);
+  const [controlsOpen, setControlsOpen] = useState(false); // mobile-only disclosure
 
   useEffect(() => {
     setYears([String(spec.timeRange[0]), String(spec.timeRange[1])]);
@@ -196,23 +197,26 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
     .slice(0, 200);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-      <div>
+    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="lg:col-start-1 lg:row-start-1">
         <h1 className="text-2xl font-bold tracking-tight">{spec.title}</h1>
         <div className="mt-4 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
           <ChartRenderer spec={spec} data={data} columns={columns} population={population} />
           <CitationFooter columns={Object.values(columns)} />
         </div>
-
-        <ChartChat
-          series={spec.series.map((r) => ({ slug: r.slug, column: r.column }))}
-          entities={spec.entities}
-          timeRange={spec.timeRange}
-          transforms={spec.transforms}
-        />
       </div>
 
-      <aside className="space-y-6">
+      <aside className="space-y-6 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+        <button
+          type="button"
+          onClick={() => setControlsOpen((v) => !v)}
+          aria-expanded={controlsOpen}
+          className="flex min-h-11 w-full items-center justify-between rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm font-medium shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 lg:hidden"
+        >
+          Chart controls
+          <span aria-hidden="true">{controlsOpen ? "▲" : "▾"}</span>
+        </button>
+        <div className={`${controlsOpen ? "block" : "hidden"} space-y-6 lg:block`}>
         <section>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Series</h2>
           <ul className="mt-2 space-y-2">
@@ -337,7 +341,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
           <button
             type="button"
             onClick={() => setEntityPickerOpen((v) => !v)}
-            className="mt-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+            className="mt-2 min-h-11 lg:min-h-0 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
           >
             {entityPickerOpen ? "Close" : "Add country ▾"}
           </button>
@@ -377,7 +381,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
               type="number"
               value={years[0]}
               onChange={(e) => setYears([e.target.value, years[1]])}
-              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm"
+              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm min-h-11 lg:min-h-0"
               aria-label="From year"
             />
             <span className="text-gray-500 dark:text-slate-400">to</span>
@@ -385,19 +389,29 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
               type="number"
               value={years[1]}
               onChange={(e) => setYears([years[0], e.target.value])}
-              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm"
+              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm min-h-11 lg:min-h-0"
               aria-label="To year"
             />
             <button
               type="button"
               onClick={applyTime}
-              className="rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+              className="min-h-11 lg:min-h-0 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
             >
               Apply
             </button>
           </div>
         </section>
+        </div>
       </aside>
+
+      <div className="lg:col-start-1 lg:row-start-2">
+        <ChartChat
+          series={spec.series.map((r) => ({ slug: r.slug, column: r.column }))}
+          entities={spec.entities}
+          timeRange={spec.timeRange}
+          transforms={spec.transforms}
+        />
+      </div>
     </div>
   );
 }
