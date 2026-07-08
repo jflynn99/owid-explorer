@@ -235,7 +235,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
                         onClick={() =>
                           updateSeries(spec.series.map((r, j) => (j === i ? { ...r, axis } : r)))
                         }
-                        className={`px-2 py-0.5 ${ref.axis === axis ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800"}`}
+                        className={`px-2 py-1 ${ref.axis === axis ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800"}`}
                       >
                         {axis === "left" ? "L axis" : "R axis"}
                       </button>
@@ -244,7 +244,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
                   <button
                     type="button"
                     onClick={() => updateSeries(spec.series.filter((_, j) => j !== i))}
-                    className="text-xs text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
+                    className="py-1 text-xs text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
                     aria-label={`Remove ${refLabel(ref, columns)}`}
                   >
                     Remove
@@ -331,7 +331,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
                   onClick={() => toggleEntity(code)}
                   aria-label={`Remove ${name}`}
                   title="Remove"
-                  className="rounded-full bg-blue-50 dark:bg-blue-950 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700 dark:hover:text-red-300"
+                  className="rounded-full bg-blue-50 dark:bg-blue-950 px-2 py-1 text-xs text-blue-700 dark:text-blue-300 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700 dark:hover:text-red-300"
                 >
                   {name} ×
                 </button>

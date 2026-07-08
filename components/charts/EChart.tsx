@@ -15,9 +15,12 @@ echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, Canvas
 export default function EChart({
   option,
   className,
+  ariaLabel,
 }: {
   option: EChartsCoreOption;
   className?: string;
+  // Canvas content is invisible to screen readers — callers pass a description
+  ariaLabel?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
@@ -40,5 +43,12 @@ export default function EChart({
     chartRef.current?.setOption(option, { notMerge: true });
   }, [option]);
 
-  return <div ref={containerRef} className={className ?? "h-[28rem] w-full"} />;
+  return (
+    <div
+      ref={containerRef}
+      role={ariaLabel ? "img" : undefined}
+      aria-label={ariaLabel}
+      className={className ?? "h-[28rem] w-full"}
+    />
+  );
 }

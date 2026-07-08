@@ -115,7 +115,7 @@ export default async function ChartPage({ params, searchParams }: PageProps) {
         <ChartControls slug={slug} selectedCodes={selectedCodes} timeRange={timeRange} />
         <Link
           href={`/overlay?s=${encodeSpec(spec)}`}
-          className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          className="py-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
         >
           Compare with another series →
         </Link>

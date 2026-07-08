@@ -175,8 +175,14 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
         />
       )}
 
-      {messages.length > 0 && (
-        <div className="mt-4 space-y-3" role="log" aria-live="polite" aria-busy={busy}>
+      {/* Always mounted: a live region added at the same time as its content
+          is not announced — it must pre-exist the first streamed answer. */}
+      <div
+        className={messages.length > 0 ? "mt-4 space-y-3" : ""}
+        role="log"
+        aria-live="polite"
+        aria-busy={busy}
+      >
           {messages.map((message) => (
             <div key={message.id}>
               {message.role === "user" ? (
@@ -231,7 +237,6 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
           ))}
           {busy && <p className="text-xs text-gray-500 dark:text-slate-400">Thinking…</p>}
         </div>
-      )}
 
       {messages.length > 0 && !busy && canChat && !exhausted && (
         <SuggestionChips

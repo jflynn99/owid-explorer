@@ -35,10 +35,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/" className="text-lg font-semibold tracking-tight">
                 OWID <span className="text-blue-600 dark:text-blue-400">Explorer</span>
               </Link>
-              <Link href="/overlay" className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
+              <Link href="/overlay" className="py-1 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
                 Overlay builder
               </Link>
-              <Link href="/agent" className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
+              <Link href="/agent" className="py-1 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
                 Agent
               </Link>
             </div>
