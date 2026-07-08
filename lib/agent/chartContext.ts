@@ -17,6 +17,9 @@ export function downsamplePoints(
   points: [number, number][],
   maxPoints: number = MAX_POINTS_PER_SERIES
 ): [number, number][] {
+  // Degenerate budgets: the step maths below divides by (maxPoints - 1).
+  if (maxPoints <= 0) return [];
+  if (maxPoints === 1) return points.slice(0, 1);
   if (points.length <= maxPoints) return points;
   const step = (points.length - 1) / (maxPoints - 1);
   const out: [number, number][] = [];

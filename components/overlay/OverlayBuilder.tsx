@@ -47,6 +47,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
     String(spec.timeRange[1]),
   ]);
   const [addError, setAddError] = useState<string | null>(null);
+  const [controlsOpen, setControlsOpen] = useState(false); // mobile-only disclosure
 
   useEffect(() => {
     setYears([String(spec.timeRange[0]), String(spec.timeRange[1])]);
@@ -196,25 +197,28 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
     .slice(0, 200);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-      <div>
+    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="lg:col-start-1 lg:row-start-1">
         <h1 className="text-2xl font-bold tracking-tight">{spec.title}</h1>
         <div className="mt-4 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
           <ChartRenderer spec={spec} data={data} columns={columns} population={population} />
           <CitationFooter columns={Object.values(columns)} />
         </div>
-
-        <ChartChat
-          series={spec.series.map((r) => ({ slug: r.slug, column: r.column }))}
-          entities={spec.entities}
-          timeRange={spec.timeRange}
-          transforms={spec.transforms}
-        />
       </div>
 
-      <aside className="space-y-6">
+      <aside className="space-y-6 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+        <button
+          type="button"
+          onClick={() => setControlsOpen((v) => !v)}
+          aria-expanded={controlsOpen}
+          className="flex min-h-11 w-full items-center justify-between rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm font-medium shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 lg:hidden"
+        >
+          Chart controls
+          <span aria-hidden="true">{controlsOpen ? "▲" : "▾"}</span>
+        </button>
+        <div className={`${controlsOpen ? "block" : "hidden"} space-y-6 lg:block`}>
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Series</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Series</h2>
           <ul className="mt-2 space-y-2">
             {spec.series.map((ref, i) => (
               <li
@@ -231,7 +235,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
                         onClick={() =>
                           updateSeries(spec.series.map((r, j) => (j === i ? { ...r, axis } : r)))
                         }
-                        className={`px-2 py-0.5 ${ref.axis === axis ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800"}`}
+                        className={`px-2 py-1 ${ref.axis === axis ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800"}`}
                       >
                         {axis === "left" ? "L axis" : "R axis"}
                       </button>
@@ -240,7 +244,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
                   <button
                     type="button"
                     onClick={() => updateSeries(spec.series.filter((_, j) => j !== i))}
-                    className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400"
+                    className="py-1 text-xs text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
                     aria-label={`Remove ${refLabel(ref, columns)}`}
                   >
                     Remove
@@ -256,7 +260,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
         </section>
 
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Transforms</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Transforms</h2>
           <div className="mt-2 space-y-2 text-sm">
             <label className="flex items-center gap-2">
               <input
@@ -283,7 +287,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
               />
               Z-score
             </label>
-            <label className={`flex items-center gap-2 ${allNormalised ? "text-gray-400 dark:text-slate-500" : ""}`}>
+            <label className={`flex items-center gap-2 ${allNormalised ? "text-gray-500 dark:text-slate-400" : ""}`}>
               <input
                 type="checkbox"
                 disabled={allNormalised}
@@ -292,7 +296,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
               />
               Per capita{allNormalised && " (already normalised)"}
             </label>
-            <label className={`flex items-center gap-2 ${hasZScore ? "text-gray-400 dark:text-slate-500" : ""}`}>
+            <label className={`flex items-center gap-2 ${hasZScore ? "text-gray-500 dark:text-slate-400" : ""}`}>
               <input
                 type="checkbox"
                 disabled={hasZScore}
@@ -302,7 +306,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
               Log scale (left)
             </label>
             {spec.axes.right && (
-              <label className={`flex items-center gap-2 ${hasZScore ? "text-gray-400 dark:text-slate-500" : ""}`}>
+              <label className={`flex items-center gap-2 ${hasZScore ? "text-gray-500 dark:text-slate-400" : ""}`}>
                 <input
                   type="checkbox"
                   disabled={hasZScore}
@@ -316,24 +320,28 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
         </section>
 
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Countries</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Countries</h2>
           <div className="mt-2 flex flex-wrap gap-1">
-            {spec.entities.map((code) => (
-              <button
-                key={code}
-                type="button"
-                onClick={() => toggleEntity(code)}
-                title="Remove"
-                className="rounded-full bg-blue-50 dark:bg-blue-950 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-300 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700 dark:hover:text-red-300"
-              >
-                {entityOptions?.entities.find((e) => e.code === code)?.entity ?? code} ×
-              </button>
-            ))}
+            {spec.entities.map((code) => {
+              const name = entityOptions?.entities.find((e) => e.code === code)?.entity ?? code;
+              return (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => toggleEntity(code)}
+                  aria-label={`Remove ${name}`}
+                  title="Remove"
+                  className="rounded-full bg-blue-50 dark:bg-blue-950 px-2 py-1 text-xs text-blue-700 dark:text-blue-300 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700 dark:hover:text-red-300"
+                >
+                  {name} ×
+                </button>
+              );
+            })}
           </div>
           <button
             type="button"
             onClick={() => setEntityPickerOpen((v) => !v)}
-            className="mt-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+            className="mt-2 min-h-11 lg:min-h-0 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
           >
             {entityPickerOpen ? "Close" : "Add country ▾"}
           </button>
@@ -344,10 +352,11 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
                 value={entityFilter}
                 onChange={(e) => setEntityFilter(e.target.value)}
                 placeholder="Filter…"
-                className="mb-2 w-full rounded border border-gray-300 dark:border-slate-700 px-2 py-1 text-sm focus:outline-none"
+                aria-label="Filter countries"
+                className="mb-2 w-full rounded border border-gray-300 dark:border-slate-700 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <ul className="max-h-48 overflow-auto text-sm">
-                {!entityOptions && <li className="px-2 py-1 text-gray-400 dark:text-slate-500">Loading…</li>}
+                {!entityOptions && <li className="px-2 py-1 text-gray-500 dark:text-slate-400">Loading…</li>}
                 {filteredEntities.map((e) => (
                   <li key={e.code}>
                     <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 hover:bg-blue-50 dark:hover:bg-slate-800">
@@ -366,13 +375,13 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
         </section>
 
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 dark:text-slate-500">Time range</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Time range</h2>
           <div className="mt-2 flex items-center gap-2 text-sm">
             <input
               type="number"
               value={years[0]}
               onChange={(e) => setYears([e.target.value, years[1]])}
-              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm"
+              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm min-h-11 lg:min-h-0"
               aria-label="From year"
             />
             <span className="text-gray-500 dark:text-slate-400">to</span>
@@ -380,19 +389,29 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
               type="number"
               value={years[1]}
               onChange={(e) => setYears([years[0], e.target.value])}
-              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm"
+              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm min-h-11 lg:min-h-0"
               aria-label="To year"
             />
             <button
               type="button"
               onClick={applyTime}
-              className="rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+              className="min-h-11 lg:min-h-0 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
             >
               Apply
             </button>
           </div>
         </section>
+        </div>
       </aside>
+
+      <div className="lg:col-start-1 lg:row-start-2">
+        <ChartChat
+          series={spec.series.map((r) => ({ slug: r.slug, column: r.column }))}
+          entities={spec.entities}
+          timeRange={spec.timeRange}
+          transforms={spec.transforms}
+        />
+      </div>
     </div>
   );
 }

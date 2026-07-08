@@ -35,10 +35,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/" className="text-lg font-semibold tracking-tight">
                 OWID <span className="text-blue-600 dark:text-blue-400">Explorer</span>
               </Link>
-              <Link href="/overlay" className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
+              <Link href="/overlay" className="py-1 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
                 Overlay builder
               </Link>
-              <Link href="/agent" className="text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
+              <Link href="/agent" className="py-1 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
                 Agent
               </Link>
             </div>
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
-        <footer className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-6 text-xs text-gray-400 dark:border-slate-800 dark:text-slate-500">
+        <footer className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-6 text-xs text-gray-500 dark:border-slate-800 dark:text-slate-400">
           <span>
             Charts rendered independently from OWID&apos;s public APIs. OWID content is CC BY;
             underlying third-party data may carry its own terms.

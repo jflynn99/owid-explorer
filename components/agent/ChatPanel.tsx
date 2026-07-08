@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import KeyManager, { loadLlmConfig, type LlmConfig } from "./KeyManager";
 import SpecChart from "./SpecChart";
+import Markdown from "./Markdown";
 
 const SUGGESTIONS = [
   "Show me renewable energy adoption vs GDP per capita in Germany",
@@ -15,6 +16,33 @@ const SUGGESTIONS = [
 interface ArticleRef {
   title: string;
   url: string;
+}
+
+// Suggestion chips, shown as an empty-state prompt and as follow-ups after answers.
+function SuggestionChips({
+  items,
+  onPick,
+  disabled,
+}: {
+  items: string[];
+  onPick: (s: string) => void;
+  disabled: boolean;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {items.map((s) => (
+        <button
+          key={s}
+          type="button"
+          disabled={disabled}
+          onClick={() => onPick(s)}
+          className="rounded-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-gray-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
+        >
+          {s}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 export default function ChatPanel({ serverConfigured }: { serverConfigured: boolean }) {
@@ -32,7 +60,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
     [config]
   );
 
-  const { messages, sendMessage, status, error } = useChat({ transport });
+  const { messages, sendMessage, status, error, stop, regenerate } = useChat({ transport });
   const canChat = serverConfigured || config !== null;
   const busy = status === "submitted" || status === "streaming";
 
@@ -47,26 +75,14 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
       {!serverConfigured && <KeyManager onChange={setConfig} />}
 
-      <div className="min-h-64 space-y-4">
+      <div className="min-h-64 space-y-4" role="log" aria-live="polite" aria-busy={busy}>
         {messages.length === 0 && (
           <div className="pt-4">
             <p className="text-sm text-gray-500 dark:text-slate-400">
               Ask for any data OWID publishes — the agent finds it, combines it, renders a chart
               with citations, and can explain it using OWID&apos;s own articles.
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {SUGGESTIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  disabled={!canChat}
-                  onClick={() => submit(s)}
-                  className="rounded-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-gray-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+            <SuggestionChips items={SUGGESTIONS} onPick={submit} disabled={!canChat} />
           </div>
         )}
 
@@ -82,17 +98,13 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
               <div className="space-y-3">
                 {message.parts.map((part, i) => {
                   if (part.type === "text" && part.text.trim()) {
-                    return (
-                      <p key={i} className="whitespace-pre-wrap text-sm text-gray-800 dark:text-slate-200">
-                        {part.text}
-                      </p>
-                    );
+                    return <Markdown key={i}>{part.text}</Markdown>;
                   }
                   if (part.type === "tool-search_indicators" || part.type === "tool-fetch_series") {
                     const label =
                       part.type === "tool-search_indicators" ? "Searching OWID" : "Checking data";
                     return (
-                      <p key={i} className="text-xs text-gray-400 dark:text-slate-500">
+                      <p key={i} className="text-xs text-gray-500 dark:text-slate-400">
                         {label}
                         {"input" in part && part.input
                           ? `: ${JSON.stringify((part.input as { query?: string; slug?: string }).query ?? (part.input as { slug?: string }).slug ?? "")}`
@@ -104,11 +116,21 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
                     const output = part.output as { ok: boolean };
                     return output.ok ? <SpecChart key={i} spec={part.input} /> : null;
                   }
+                  if (
+                    part.type === "tool-explain_chart" &&
+                    (part.state === "input-streaming" || part.state === "input-available")
+                  ) {
+                    return (
+                      <p key={i} className="text-xs text-gray-500 dark:text-slate-400">
+                        Reading OWID articles…
+                      </p>
+                    );
+                  }
                   if (part.type === "tool-explain_chart" && part.state === "output-available") {
                     const output = part.output as { articles: ArticleRef[] };
                     if (!output.articles?.length) return null;
                     return (
-                      <p key={i} className="text-xs text-gray-400 dark:text-slate-500">
+                      <p key={i} className="text-xs text-gray-500 dark:text-slate-400">
                         Reading:{" "}
                         {output.articles.map((a, j) => (
                           <span key={a.url}>
@@ -133,11 +155,18 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
           </div>
         ))}
 
-        {busy && <p className="text-xs text-gray-400 dark:text-slate-500">Thinking…</p>}
+        {messages.length > 0 && !busy && canChat && (
+          <SuggestionChips items={SUGGESTIONS} onPick={submit} disabled={busy} />
+        )}
+
+        {busy && <p className="text-xs text-gray-500 dark:text-slate-400">Thinking…</p>}
         {error && (
           <p className="text-sm text-red-600 dark:text-red-400">
-            The agent request failed{error.message ? `: ${error.message}` : ""}. Check your key and
-            try again.
+            The agent request failed{error.message ? `: ${error.message}` : ""}.{" "}
+            <button type="button" onClick={() => regenerate()} className="font-medium underline">
+              Retry
+            </button>
+            , or check your key.
           </p>
         )}
       </div>
@@ -153,16 +182,27 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={canChat ? "Ask about any OWID data…" : "Add a key above to enable the agent"}
+          aria-label="Ask about any OWID data"
           disabled={!canChat}
-          className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none disabled:bg-gray-50 dark:disabled:bg-slate-900"
+          className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 dark:disabled:bg-slate-900"
         />
-        <button
-          type="submit"
-          disabled={!canChat || busy || !input.trim()}
-          className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          Send
-        </button>
+        {busy ? (
+          <button
+            type="button"
+            onClick={() => stop()}
+            className="rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+          >
+            Stop
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={!canChat || !input.trim()}
+            className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            Send
+          </button>
+        )}
       </form>
     </div>
   );

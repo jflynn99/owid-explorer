@@ -84,7 +84,7 @@ export default function SpecChart({ spec: rawSpec }: { spec: unknown }) {
   if (error) return <p className="text-sm text-red-600 dark:text-red-400">{error}</p>;
   if (!loaded) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-gray-400 dark:text-slate-500">
+      <div className="flex h-48 items-center justify-center rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm text-gray-500 dark:text-slate-400">
         Loading chart…
       </div>
     );

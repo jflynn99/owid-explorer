@@ -8,6 +8,7 @@ import {
   usedToday,
 } from "../lib/agent/quota";
 import { buildChartContext, buildChatContext, downsamplePoints } from "../lib/agent/chartContext";
+import { chartChatSystemPrompt } from "../lib/agent/prompts";
 import { resolveServerFunded } from "../lib/agent/providers";
 import { parseChartCsv } from "../lib/owid/parse";
 import type { GrapherMetadata } from "../lib/owid/types";
@@ -89,6 +90,16 @@ describe("downsamplePoints", () => {
     expect(out[0]).toEqual([1800, 0]);
     expect(out[out.length - 1]).toEqual([1999, 199]);
   });
+
+  it("handles degenerate budgets without dividing by zero", () => {
+    expect(downsamplePoints(points, 0)).toEqual([]);
+    expect(downsamplePoints(points, 1)).toEqual([[1800, 0]]);
+    expect(downsamplePoints(points, 2)).toEqual([
+      [1800, 0],
+      [1999, 199],
+    ]);
+    expect(downsamplePoints([], 1)).toEqual([]);
+  });
 });
 
 describe("buildChartContext", () => {
@@ -137,6 +148,16 @@ United Kingdom,GBR,2020,80.4,1`;
     const ctx = buildChartContext(meta, parseChartCsv(twoColCsv), ["life_expectancy"]);
     expect(ctx).toContain("life_expectancy");
     expect(ctx).not.toContain("other_col");
+  });
+});
+
+describe("chartChatSystemPrompt", () => {
+  it("embeds the context and the striking-fact opening rule", () => {
+    const prompt = chartChatSystemPrompt("THE-CONTEXT");
+    expect(prompt).toContain("THE-CONTEXT");
+    expect(prompt).toContain("most striking fact");
+    // The data-vs-interpretation separation must survive future edits.
+    expect(prompt).toContain("keep data facts and interpretation distinct");
   });
 });
 

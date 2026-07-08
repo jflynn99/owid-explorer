@@ -135,7 +135,10 @@ export default function ChartRenderer({
 
   return (
     <div>
-      <EChart option={option} />
+      <EChart
+        option={option}
+        ariaLabel={`Line chart: ${spec.title}, ${spec.timeRange[0]} to ${spec.timeRange[1]}. Data table alternative in the citation below.`}
+      />
       {caveats.length > 0 && (
         <ul className="mt-2 space-y-1">
           {caveats.map((c, i) => (
