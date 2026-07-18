@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${inter.className} min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 antialiased`}
       >
-        <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
+        <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/70 backdrop-blur-md backdrop-saturate-150 dark:border-slate-800 dark:bg-slate-950/70">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
             <div className="flex items-center gap-6">
               <Link href="/" className="text-lg font-semibold tracking-tight">

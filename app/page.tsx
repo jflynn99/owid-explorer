@@ -69,7 +69,7 @@ export default async function HomePage() {
         {FEATURES.map((f) => (
           <div
             key={f.title}
-            className={`rounded-xl border p-4 ${
+            className={`reveal-up rounded-xl border p-4 ${
               f.accent
                 ? "border-blue-200 bg-blue-50/60 dark:border-blue-900 dark:bg-blue-950/40"
                 : "border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900"
@@ -96,7 +96,7 @@ export default async function HomePage() {
           <Link
             key={c.slug}
             href={`/chart/${c.slug}`}
-            className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
+            className="group reveal-up rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700"
           >
             <span className="font-medium text-gray-900 group-hover:text-blue-700 dark:text-slate-100 dark:group-hover:text-blue-300">
               {c.title}

@@ -10,3 +10,57 @@
 .dark {
   color-scheme: dark;
 }
+
+/* Typography: balanced headings, no orphan words in body text */
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Cards fade and rise as they enter the viewport. Positive @supports
+   gate: engines without view timelines never hide the content at all.
+   Applied to homepage tiles only — never to a live ECharts container,
+   which measures itself on mount. */
+@supports (animation-timeline: view()) {
+  .reveal-up {
+    animation: reveal-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    translate: 0 1.25rem;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* Reduced motion: flatten every animation and transition. ECharts is not
+   affected by CSS — its animations are already disabled unconditionally in
+   ChartRenderer (animation: false). Must stay last so the overrides win. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal-up {
+    animation: none;
+    opacity: 1;
+    translate: none;
+  }
+}

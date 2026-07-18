@@ -42,8 +42,9 @@ export default function ChartRenderer({
     const allCaveats: string[] = [...(spec.caveats ?? [])];
     const echartsSeries: object[] = [];
     // Colour = entity, dash pattern = series: the same country keeps the same
-    // colour across overlaid datasets (lib/chartColors.ts).
-    const colorFor = entityColorAssigner();
+    // colour across overlaid datasets (lib/chartColors.ts). Theme-aware: the
+    // dark palette is the same hues re-stepped for the dark surface.
+    const colorFor = entityColorAssigner(isDark);
 
     for (const [refIndex, ref] of spec.series.entries()) {
       const key = seriesKey(ref);

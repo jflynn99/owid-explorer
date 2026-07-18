@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PALETTE, entityColorAssigner, seriesDash } from "../lib/chartColors";
+import { PALETTE, PALETTE_DARK, entityColorAssigner, seriesDash } from "../lib/chartColors";
 
 describe("entityColorAssigner", () => {
   it("gives the same entity the same colour across series", () => {
@@ -18,6 +18,17 @@ describe("entityColorAssigner", () => {
       expect(colorFor(`E${i}`)).toBe(PALETTE[i]);
     }
     expect(colorFor("overflow")).toBe(PALETTE[0]);
+  });
+
+  it("keeps the same slot per entity in both themes", () => {
+    const light = entityColorAssigner(false);
+    const dark = entityColorAssigner(true);
+    // Same first-seen order -> same slot -> same hue family across themes
+    expect(light("USA")).toBe(PALETTE[0]);
+    expect(dark("USA")).toBe(PALETTE_DARK[0]);
+    expect(light("GBR")).toBe(PALETTE[1]);
+    expect(dark("GBR")).toBe(PALETTE_DARK[1]);
+    expect(PALETTE_DARK).toHaveLength(PALETTE.length);
   });
 });
 
