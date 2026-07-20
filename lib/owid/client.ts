@@ -44,11 +44,18 @@ export async function fetchChartCsv(slug: string, filter: CsvFilter = {}): Promi
   const params = new URLSearchParams({
     csvType: "filtered",
     useColumnShortNames: "true",
+    // Always force the line tab: for map-default charts the filtered CSV
+    // otherwise contains only the map's single display year, which poisons
+    // everything derived from it (entity lists, min/max years, overlay
+    // time ranges).
+    tab: "line",
   });
   if (filter.entities && filter.entities.length > 0) {
-    params.set("country", filter.entities.slice(0, 50).join("~"));
-    // Map-default charts ignore the country filter unless a line tab is forced
-    params.set("tab", "line");
+    const entities = filter.entities.slice(0, 50);
+    // A single multi-word entity name only matches when the param is
+    // unambiguously a selection list, so a lone entity gets a leading "~"
+    // (the same form OWID's own single-country URLs use).
+    params.set("country", entities.length === 1 ? `~${entities[0]}` : entities.join("~"));
   }
   if (filter.timeRange) {
     params.set("time", `${filter.timeRange[0]}..${filter.timeRange[1]}`);

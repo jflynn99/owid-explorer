@@ -32,6 +32,12 @@ summary.
   `lib/owid/client.ts`, cached 24h. Never ship a full unfiltered CSV to the browser.
 - Always pass `useColumnShortNames=true` to BOTH the CSV and metadata endpoints —
   that keys metadata columns by the CSV's short column names.
+- Always pass `tab=line` to the filtered CSV endpoint, even with no other filters —
+  map-default charts otherwise return only the map's single display year, which
+  poisons entity lists, min/max years, and overlay time ranges derived from it.
+- A lone entity in the `country` filter must be prefixed with `~`
+  (`country=~United States`) — bare single multi-word names silently match
+  nothing. `fetchChartCsv` handles both rules; route new fetches through it.
 - ECharts via tree-shaken `echarts/core` and the in-repo `components/charts/EChart.tsx`
   wrapper. Do not add `echarts-for-react`.
 - Every chart shows `CitationFooter` (citationShort, unit, timespan, CC-BY note).

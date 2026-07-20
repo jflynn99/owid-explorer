@@ -66,7 +66,9 @@ export default function ChartRenderer({
           type: "line",
           name,
           yAxisIndex: ref.axis === "right" ? 1 : 0,
-          showSymbol: false,
+          // A line needs two points; an isolated point must show its symbol
+          // or the series is invisible
+          showSymbol: entitySeries.points.length < 2,
           connectNulls: false, // gaps stay gaps — no interpolation
           data: entitySeries.points,
           lineStyle: { width: 2, type: seriesDash(refIndex) ?? "solid" },
