@@ -3,7 +3,7 @@
 // ChartSpec + data -> ECharts option. The only place chart pixels are decided;
 // the agent and the overlay builder only ever produce ChartSpec (SPEC.md §5).
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { EChartsCoreOption } from "echarts/core";
 import { seriesKey, type ChartSpec } from "@/lib/chartSpec";
 import { applyTransforms } from "@/lib/transforms";
@@ -38,6 +38,19 @@ export default function ChartRenderer({
 }) {
   const isDark = useIsDark();
 
+  // Phones have no room for a label gutter beside the plot, so below 520px
+  // the chart falls back to a legend underneath. Measured here rather than
+  // with ECharts' own media queries, which drag in the timeline component.
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => setNarrow(entry.contentRect.width < 520));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const { option, caveats } = useMemo(() => {
     const allCaveats: string[] = [...(spec.caveats ?? [])];
     const echartsSeries: object[] = [];
@@ -57,7 +70,11 @@ export default function ChartRenderer({
       );
       allCaveats.push(...transformCaveats);
 
+      // A single dataset gets its entity names written at the line ends
+      // (no legend lookup). Overlays keep the legend: their series names are
+      // "Title — Entity", too long to hang off the right edge.
       const multiRef = spec.series.length > 1;
+      const endLabels = !multiRef && !narrow;
       for (const entitySeries of transformed) {
         const name = multiRef
           ? `${meta?.titleShort ?? ref.column} — ${entitySeries.entity}`
@@ -72,6 +89,21 @@ export default function ChartRenderer({
           connectNulls: false, // gaps stay gaps — no interpolation
           data: entitySeries.points,
           lineStyle: { width: 2, type: seriesDash(refIndex) ?? "solid" },
+          // Hovering a line keeps it in colour and fades the rest.
+          emphasis: { focus: "series", lineStyle: { width: 2.5 } },
+          blur: { lineStyle: { opacity: 0.18 }, endLabel: { opacity: 0.25 } },
+          ...(endLabels && {
+            endLabel: {
+              show: true,
+              formatter: "{a}",
+              color: "inherit",
+              fontSize: 12,
+              distance: 6,
+              width: 128,
+              overflow: "truncate",
+            },
+            labelLayout: { moveOverlap: "shiftY" },
+          }),
           color: ref.color ?? colorFor(entitySeries.code || entitySeries.entity),
         });
       }
@@ -81,11 +113,15 @@ export default function ChartRenderer({
       const ref = spec.series.find((s) => s.axis === axis);
       return ref ? columns[seriesKey(ref)] : undefined;
     };
-    // ECharts doesn't know about Tailwind's dark class — style axes/legend/
-    // tooltip explicitly per theme (slate palette, matching the page chrome).
-    const text = isDark ? "#94a3b8" : "#6b7280";
-    const axisLine = isDark ? "#334155" : "#d1d5db";
-    const splitLine = isDark ? "#1e293b" : "#e5e7eb";
+    // ECharts cannot see Tailwind's dark class, so axes, legend, and tooltip
+    // are styled explicitly per theme. These are hex equivalents of the warm
+    // neutrals in tailwind.config.ts (canvas cannot parse oklch()):
+    // gray-600/slate-400 for text, gray-400/slate-600 for the axis,
+    // gray-200/slate-800 for rules.
+    const text = isDark ? "#a8a59f" : "#5a5650";
+    const axisLine = isDark ? "#57544f" : "#a8a59f";
+    const splitLine = isDark ? "#2b2926" : "#e6e3de";
+    const directLabels = spec.series.length === 1 && !narrow;
 
     const yAxes: object[] = [
       {
@@ -94,6 +130,8 @@ export default function ChartRenderer({
         nameTextStyle: { align: "left", color: text },
         scale: true,
         axisLabel: { color: text },
+        axisLine: { show: false },
+        axisTick: { show: false },
         splitLine: { lineStyle: { color: splitLine } },
       },
     ];
@@ -104,23 +142,41 @@ export default function ChartRenderer({
         nameTextStyle: { align: "right", color: text },
         scale: true,
         axisLabel: { color: text },
+        axisLine: { show: false },
+        axisTick: { show: false },
         splitLine: { show: false },
       });
     }
 
     const option: EChartsCoreOption = {
       animation: false,
-      grid: { left: 60, right: spec.axes.right ? 60 : 24, top: 48, bottom: 72 },
-      legend: { bottom: 0, type: "scroll", textStyle: { color: isDark ? "#cbd5e1" : "#374151" } },
+      grid: {
+        left: 52,
+        right: spec.axes.right ? 60 : directLabels ? 140 : 24,
+        top: 40,
+        bottom: directLabels ? 32 : 72,
+      },
+      legend: {
+        show: !directLabels,
+        bottom: 0,
+        type: "scroll",
+        icon: "roundRect",
+        itemWidth: 18,
+        itemHeight: 3,
+        textStyle: { color: isDark ? "#d6d3cd" : "#3d3a35" },
+      },
       tooltip: {
         trigger: "axis",
         valueFormatter: (v: unknown) =>
           typeof v === "number" ? Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(v) : "",
-        ...(isDark && {
-          backgroundColor: "#1e293b",
-          borderColor: "#334155",
-          textStyle: { color: "#e2e8f0" },
-        }),
+        backgroundColor: isDark ? "#1f1d1b" : "#fcfbf9",
+        borderColor: isDark ? "#57544f" : "#2a2724",
+        borderWidth: 1,
+        borderRadius: 0,
+        shadowBlur: 0,
+        shadowColor: "transparent",
+        textStyle: { color: isDark ? "#e9e6e1" : "#2a2724", fontSize: 12 },
+        axisPointer: { lineStyle: { color: axisLine, type: "solid" } },
       },
       xAxis: {
         type: "value",
@@ -128,16 +184,19 @@ export default function ChartRenderer({
         max: spec.timeRange[1],
         axisLabel: { formatter: (v: number) => String(Math.round(v)), color: text },
         axisLine: { lineStyle: { color: axisLine } },
+        axisTick: { lineStyle: { color: axisLine } },
+        // No vertical rules: the year axis and the tooltip pointer are enough.
+        splitLine: { show: false },
       },
       yAxis: yAxes,
       series: echartsSeries,
     };
 
     return { option, caveats: allCaveats };
-  }, [spec, data, columns, population, isDark]);
+  }, [spec, data, columns, population, isDark, narrow]);
 
   return (
-    <div>
+    <div ref={wrapRef}>
       <EChart
         option={option}
         ariaLabel={`Line chart: ${spec.title}, ${spec.timeRange[0]} to ${spec.timeRange[1]}. Data table alternative in the citation below.`}
