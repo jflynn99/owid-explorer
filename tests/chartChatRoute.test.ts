@@ -15,6 +15,8 @@ vi.mock("@/lib/owid/client", async (importOriginal) => {
 });
 
 import { GET, POST } from "../app/api/chart-chat/route";
+import { resetGlobalCapForTests } from "../lib/agent/globalCap";
+import { CHART_CHAT_MAX_INPUT_CHARS } from "../lib/agent/limits";
 
 const VALID_BODY = {
   series: [{ slug: "life-expectancy" }],
@@ -40,6 +42,7 @@ function clearProviderEnv() {
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  resetGlobalCapForTests();
 });
 
 describe("POST /api/chart-chat branches", () => {
@@ -74,6 +77,39 @@ describe("POST /api/chart-chat branches", () => {
     expect(json.remaining).toBe(0);
   });
 
+  it("413 when the message history is over the size cap", async () => {
+    const huge = "x".repeat(CHART_CHAT_MAX_INPUT_CHARS + 1);
+    const res = await post({
+      ...VALID_BODY,
+      messages: [{ role: "user", parts: [{ type: "text", text: huge }] }],
+    });
+    expect(res.status).toBe(413);
+    expect((await res.json()).error).toBe("too_large");
+  });
+
+  it("429 once the site-wide daily cap is reached, even for a fresh visitor", async () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "sk-test");
+    vi.stubEnv("CHAT_QUOTA_SECRET", "test-secret");
+    vi.stubEnv("CHART_CHAT_GLOBAL_DAILY_LIMIT", "1");
+    vi.stubEnv("KV_REST_API_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    // First request takes the only slot (then 404s on the mocked OWID outage).
+    expect((await post(VALID_BODY)).status).toBe(404);
+    const res = await post(VALID_BODY);
+    expect(res.status).toBe(429);
+    const json = await res.json();
+    expect(json.error).toBe("quota_exhausted");
+    expect(json.scope).toBe("site");
+  });
+
+  it("a visitor's own key is not counted against the site-wide cap", async () => {
+    clearProviderEnv();
+    vi.stubEnv("CHART_CHAT_GLOBAL_DAILY_LIMIT", "1");
+    const own = { "x-llm-provider": "anthropic", "x-llm-key": "sk-client" };
+    expect((await post(VALID_BODY, own)).status).toBe(404);
+    expect((await post(VALID_BODY, own)).status).toBe(404);
+  });
+
   it("404 when OWID data cannot be fetched (client key bypasses quota)", async () => {
     clearProviderEnv();
     const res = await post(VALID_BODY, {
@@ -90,6 +126,17 @@ describe("GET /api/chart-chat availability", () => {
     clearProviderEnv();
     const res = await GET(new NextRequest("http://localhost/api/chart-chat"));
     expect(await res.json()).toEqual({ enabled: false, remaining: 0, limit: 0 });
+  });
+
+  it("reports nothing remaining once the site-wide cap is reached", async () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "sk-test");
+    vi.stubEnv("CHAT_QUOTA_SECRET", "test-secret");
+    vi.stubEnv("CHART_CHAT_GLOBAL_DAILY_LIMIT", "1");
+    vi.stubEnv("KV_REST_API_URL", "");
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    await post(VALID_BODY);
+    const res = await GET(new NextRequest("http://localhost/api/chart-chat"));
+    expect(await res.json()).toEqual({ enabled: true, remaining: 0, limit: 5, siteLimited: true });
   });
 
   it("reports the full quota for a fresh visitor", async () => {

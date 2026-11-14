@@ -70,8 +70,10 @@ export function resolveServerFunded(env: ServerEnv = process.env): ProviderSelec
 
 // Default models: the tool-calling here is simple enough that small models
 // handle it, and it keeps everyone's costs down (SPEC.md §7).
+// Claude Haiku 5.5 thinks before it answers by default, and that thinking
+// counts toward maxOutputTokens — see lib/agent/limits.ts for the caps.
 const DEFAULT_MODELS: Record<ProviderName, string> = {
-  anthropic: "claude-haiku-4-5",
+  anthropic: "claude-haiku-5-5",
   openai: "gpt-4o-mini",
   ollama: "llama3.1",
 };

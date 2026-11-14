@@ -25,6 +25,9 @@ interface QuotaInfo {
   enabled: boolean;
   remaining: number;
   limit: number;
+  // True when the site-wide daily cap, not this visitor's own quota, is why
+  // nothing remains.
+  siteLimited?: boolean;
 }
 
 interface ArticleRef {
@@ -156,9 +159,11 @@ export default function ChartChat({ series, entities, timeRange, transforms }: C
         <span className="text-xs text-gray-500 dark:text-slate-400">
           {usingOwnKey
             ? `Using your ${config!.provider} key`
-            : quota
-              ? `${quota.remaining} of ${quota.limit} free questions left today`
-              : ""}
+            : quota?.siteLimited
+              ? "Today's free questions have all been used"
+              : quota
+                ? `${quota.remaining} of ${quota.limit} free questions left today`
+                : ""}
         </span>
       </div>
       <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">

@@ -24,9 +24,23 @@ Three ways to run the agent (charts never need any of this):
 1. **No key** — everything except the chat panel works.
 2. **Paste a key in the UI** — stored in your browser's localStorage, sent only with
    your own chat requests, used in-memory server-side, never logged or persisted.
-   Anthropic (default `claude-haiku-4-5`) or OpenAI (default `gpt-4o-mini`).
+   Anthropic (default `claude-haiku-5-5`) or OpenAI (default `gpt-4o-mini`).
 3. **Fork with `.env`** — set `LLM_PROVIDER` + a key, or `LLM_PROVIDER=ollama` with
    `OLLAMA_BASE_URL` for fully local, free inference. See `.env.example`.
+
+### Running a public copy on your own key
+
+Set an API key and leave `LLM_PROVIDER` unset. Your key then funds only the
+"Ask about this chart" panel; the full agent stays bring-your-own-key. Three
+limits apply to that panel, all configurable in `.env.example`:
+
+- a per-visitor daily quota (default 5 questions, tracked in a signed cookie),
+- a site-wide daily cap across all visitors (default 200), and
+- fixed ceilings on the size of each request and reply (`lib/agent/limits.ts`).
+
+The site-wide cap needs a shared store (Upstash Redis or Vercel KV) to be exact
+across server instances. Set a spend limit on the key in your provider's console
+as well: it is the one limit nothing in this app can get around.
 
 ## Getting started
 
@@ -42,7 +56,7 @@ needed for the agent (Phase 3); see `.env.example`.
 
 ## Deploying
 
-Deploy as a standard Next.js project on Vercel (or anywhere Next.js 14 runs) —
+Deploy as a standard Next.js project on Vercel (or anywhere Next.js 16 runs) —
 no special configuration and no required env vars. OWID responses are cached at
 the edge (24h + stale-while-revalidate). Optional agent env vars are in
 `.env.example`.

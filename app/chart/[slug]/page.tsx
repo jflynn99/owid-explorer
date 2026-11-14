@@ -10,9 +10,10 @@ import CitationFooter from "@/components/charts/CitationFooter";
 import ChartChat from "@/components/agent/ChartChat";
 import type { ColumnMeta, EntitySeries } from "@/lib/owid/types";
 
+// Next passes route params and the query string as Promises.
 interface PageProps {
-  params: { slug: string };
-  searchParams: { country?: string; time?: string };
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ country?: string; time?: string }>;
 }
 
 function parseTimeParam(time?: string): [number, number] | undefined {
@@ -21,17 +22,19 @@ function parseTimeParam(time?: string): [number, number] | undefined {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  if (!isValidSlug(params.slug)) return {};
+  const { slug } = await params;
+  if (!isValidSlug(slug)) return {};
   try {
-    const meta = await fetchChartMetadata(params.slug);
+    const meta = await fetchChartMetadata(slug);
     return { title: meta.chart.title, description: meta.chart.subtitle };
   } catch {
     return {};
   }
 }
 
-export default async function ChartPage({ params, searchParams }: PageProps) {
-  const { slug } = params;
+export default async function ChartPage(props: PageProps) {
+  const { slug } = await props.params;
+  const searchParams = await props.searchParams;
   if (!isValidSlug(slug)) notFound();
 
   let meta;

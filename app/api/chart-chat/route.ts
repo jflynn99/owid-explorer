@@ -27,6 +27,12 @@ import {
   todayUtc,
   usedToday,
 } from "@/lib/agent/quota";
+import { globalDailyLimit, globalUsedToday, takeGlobalSlot } from "@/lib/agent/globalCap";
+import {
+  CHART_CHAT_MAX_INPUT_CHARS,
+  CHART_CHAT_MAX_OUTPUT_TOKENS,
+  prepareMessages,
+} from "@/lib/agent/limits";
 import { fetchChartCsv, fetchChartMetadata, isValidSlug } from "@/lib/owid/client";
 import { parseChartCsv } from "@/lib/owid/parse";
 
@@ -59,6 +65,12 @@ export async function GET(req: NextRequest) {
   if (!enabled) {
     return NextResponse.json({ enabled: false, remaining: 0, limit: 0 });
   }
+  // The site-wide cap (globalCap.ts) can close the feature for the day even
+  // when this visitor has questions left; report that as nothing remaining.
+  const siteLimit = globalDailyLimit();
+  if (siteLimit > 0 && (await globalUsedToday()) >= siteLimit) {
+    return NextResponse.json({ enabled: true, remaining: 0, limit, siteLimited: true });
+  }
   const state = decodeQuota(req.cookies.get(QUOTA_COOKIE)?.value, secret!);
   const remaining = Math.max(0, limit - usedToday(state));
   return NextResponse.json({ enabled: true, remaining, limit });
@@ -69,10 +81,16 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: "bad_request" }, { status: 400 });
   }
-  const { series, entities, timeRange, transforms, messages } = parsed.data;
+  const { series, entities, timeRange, transforms } = parsed.data;
   if (!series.every((s) => isValidSlug(s.slug))) {
     return NextResponse.json({ error: "bad_slug" }, { status: 400 });
   }
+  // Size cap on what the caller sends, checked before anything is spent.
+  const prepared = prepareMessages(parsed.data.messages, CHART_CHAT_MAX_INPUT_CHARS);
+  if (!prepared.ok) {
+    return NextResponse.json({ error: "too_large" }, { status: 413 });
+  }
+  const messages = prepared.messages;
 
   // A saved client key (same headers as /api/agent) bypasses the quota.
   // Passing an empty env keeps this strictly client-only — no server fallback.
@@ -97,6 +115,15 @@ export async function POST(req: NextRequest) {
     if (used >= limit) {
       return NextResponse.json(
         { error: "quota_exhausted", remaining: 0, limit },
+        { status: 429 }
+      );
+    }
+    // Site-wide total across all visitors. Taken here, before the model is
+    // called; a request that later fails still counts, which errs on the
+    // side of spending less.
+    if (!(await takeGlobalSlot())) {
+      return NextResponse.json(
+        { error: "quota_exhausted", scope: "site", remaining: 0, limit },
         { status: 429 }
       );
     }
@@ -138,6 +165,7 @@ export async function POST(req: NextRequest) {
     messages: await convertToModelMessages(messages.slice(-12) as Parameters<typeof convertToModelMessages>[0]),
     tools: { owid_articles: owidArticlesTool },
     stopWhen: stepCountIs(4),
+    maxOutputTokens: CHART_CHAT_MAX_OUTPUT_TOKENS,
   });
 
   return result.toUIMessageStreamResponse({ headers: responseHeaders });
