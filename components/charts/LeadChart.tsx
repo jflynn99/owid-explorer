@@ -17,7 +17,7 @@ export default function LeadChart({
 
   const W = 640;
   const H = 340;
-  const m = { top: 28, right: 64, bottom: 30, left: 8 };
+  const m = { top: 34, right: 100, bottom: 34, left: 8 };
 
   const [x0] = points[0];
   const [x1] = points[points.length - 1];
@@ -50,8 +50,11 @@ export default function LeadChart({
         className="stroke-gray-400 dark:stroke-slate-600"
         strokeWidth="1"
       />
+      {/* The SVG scales with the page, so type is set larger below the sm
+          breakpoint (22 units is about 12px on a phone) and the inner ticks
+          are dropped there to leave room for it. */}
       {[x0, ...ticks, x1].map((year) => (
-        <g key={year}>
+        <g key={year} className={year === x0 || year === x1 ? undefined : "max-sm:hidden"}>
           <line
             x1={px(year)}
             x2={px(year)}
@@ -64,7 +67,7 @@ export default function LeadChart({
             x={px(year)}
             y={baseline + 20}
             textAnchor={year === x0 ? "start" : year === x1 ? "end" : "middle"}
-            className="fill-gray-600 text-[13px] dark:fill-slate-400"
+            className="fill-gray-600 text-[22px] sm:text-[13px] dark:fill-slate-400"
           >
             {year}
           </text>
@@ -84,7 +87,7 @@ export default function LeadChart({
       <text
         x={px(x0) + 10}
         y={py(firstY) - 10}
-        className="fill-gray-900 font-display text-[20px] font-semibold dark:fill-slate-100"
+        className="fill-gray-900 font-display text-[30px] font-semibold sm:text-[20px] dark:fill-slate-100"
       >
         {formatValue(firstY)}
       </text>
@@ -93,7 +96,7 @@ export default function LeadChart({
       <text
         x={px(x1) + 10}
         y={py(lastY) + 6}
-        className="fill-gray-900 font-display text-[20px] font-semibold dark:fill-slate-100"
+        className="fill-gray-900 font-display text-[30px] font-semibold sm:text-[20px] dark:fill-slate-100"
       >
         {formatValue(lastY)}
       </text>

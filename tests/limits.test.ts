@@ -53,6 +53,7 @@ describe("site-wide daily cap", () => {
 
   it("defaults, parses, and treats 0 as no cap", () => {
     expect(globalDailyLimit({})).toBe(DEFAULT_GLOBAL_DAILY_LIMIT);
+    expect(DEFAULT_GLOBAL_DAILY_LIMIT).toBe(100);
     expect(globalDailyLimit({ CHART_CHAT_GLOBAL_DAILY_LIMIT: "50" })).toBe(50);
     expect(globalDailyLimit({ CHART_CHAT_GLOBAL_DAILY_LIMIT: "nonsense" })).toBe(DEFAULT_GLOBAL_DAILY_LIMIT);
     expect(globalDailyLimit({ CHART_CHAT_GLOBAL_DAILY_LIMIT: "0" })).toBe(0);

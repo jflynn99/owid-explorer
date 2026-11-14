@@ -8,15 +8,12 @@ summary.
 
 - Phase 1 (chart viewer): done
 - Phase 2 (overlays + transforms): done
-- Phase 3 (agent): done (BYO-key)
+- Phase 3 (agent): done; since folded into the site-wide chat (see below)
 - Phase 4 (publish): extracted to this standalone repo; README GIFs + blog post pending
-- Chart chat (SPEC.md §7a): done — "Ask about this chart" on chart pages,
-  server-funded with a signed-cookie daily quota; Agent page is BYO-key mode
-- v3 (quality + agent depth, SPEC.md v3 section / WORKPLAN.md): done — markdown
-  rendering in both chats, error/loading boundaries, WCAG AA contrast + focus +
-  aria-live, mobile overlay builder (supersedes the SPEC §9 desktop-first
-  deferral), chat depth (live tool status, follow-ups, retry, stop), and
-  route-branch tests for /api/chart-chat
+- Chart chat (SPEC.md §7a) and v3 (quality + agent depth): done
+- v4 (SPEC.md "v4" section): done — the Almanac design; one chat on the front
+  page, chart pages, and the overlay builder in place of the agent page; the
+  chat can edit the overlay; cost limits; Next 16 / React 19
 
 ## Context
 
@@ -52,30 +49,38 @@ summary.
 - Transforms are pure functions in `lib/transforms/` with tests. Log scale is an
   axis flag, not a transform. `perCapita` must refuse already-normalised units.
 - Proxy routes validate `slug` (`/^[a-z0-9-]+$/i`) before building upstream URLs.
-- Agent (`lib/agent/`, `/api/agent`): Vercel AI SDK; the LLM emits ChartSpecs via
-  the compose_chart tool and the client renders them (`components/agent/SpecChart`).
-  Client keys arrive as x-llm-provider/x-llm-key headers — in-memory only, never
-  logged. Ollama config comes from env only, never client headers (SSRF).
+- Chat (`lib/agent/`, `/api/chat`, `components/chat/`): ONE route, ONE hook
+  (`useExplorerChat`), three surfaces. `surface` is `home` | `chart` | `overlay`;
+  chart and overlay also send `view` (series, entities, time range, transforms,
+  and the current spec). There is no agent page: `/agent` redirects to `/`.
+  - The model has the same four tools everywhere (`lib/agent/tools.ts`) and emits
+    ChartSpecs via `compose_chart`; it never writes chart code. On home and chart
+    pages a composed chart is drawn inline (`components/agent/SpecChart`); in the
+    overlay builder it replaces the chart on the page through the same `push`
+    every manual edit uses, so the URL stays the source of truth and Back undoes.
+  - With a chart in view, the route inlines a thinned copy of the data into the
+    system prompt (`lib/agent/chartContext.ts`: at most 12 series, 40 points each,
+    the latest 12 points always kept), with the correlation caveat on overlays.
+  - `useChat` builds its chat object once and ignores later transport changes, so
+    anything that varies (the view, the visitor's key) is passed per request via
+    `sendMessage(..., { body, headers })`. Don't move it back into the transport.
+  - Funding: a visitor's own key (x-llm-provider / x-llm-key headers, in memory
+    only, never logged) bypasses every limit. Otherwise `resolveServerFunded()`
+    uses the deployment's key under a per-visitor quota (HMAC-signed cookie,
+    `lib/agent/quota.ts`, `CHART_CHAT_DAILY_LIMIT`, default 5/day) and a site-wide
+    daily cap (`lib/agent/globalCap.ts`, `CHART_CHAT_GLOBAL_DAILY_LIMIT`, default
+    100; exact only with a KV/Upstash store, otherwise per server instance).
+    `LLM_PROVIDER` only matters for Ollama, whose config comes from env only,
+    never client headers (SSRF).
+  - Per-request ceilings live in `lib/agent/limits.ts`. History passes through
+    `prepareMessages`, which also strips reasoning parts from earlier turns:
+    replayed thinking fails once history is trimmed or the system prompt changes.
 - Default models: `claude-haiku-5-5` (Anthropic), `gpt-4o-mini` (OpenAI);
   override with `LLM_MODEL`. Haiku 5.5 thinks by default and thinking counts
-  toward `maxOutputTokens`, so don't shrink the caps in `lib/agent/limits.ts`
+  toward `maxOutputTokens`, so don't shrink the cap in `lib/agent/limits.ts`
   to answer-size.
-- Chart chat (`/api/chart-chat`, `components/agent/ChartChat.tsx`): on chart AND
-  overlay pages, framed as a free trial. Body takes `series: [{slug, column?}]`
-  (≤4) plus optional transforms; context built server-side in
-  `lib/agent/chartContext.ts` (≤12 series, ≤40 downsampled points each), with
-  the correlation caveat on multi-chart contexts. Server-funded via `resolveServerFunded()` — an
-  API key WITHOUT `LLM_PROVIDER` funds chart chat only; setting `LLM_PROVIDER`
-  would also make the full agent server-funded (don't, on public deploys).
-  Daily quota = HMAC-signed cookie (`lib/agent/quota.ts`), default 5/day
-  (`CHART_CHAT_DAILY_LIMIT`). A saved BYO key bypasses the quota.
-- Cost limits on the chat routes: a site-wide daily cap across visitors
-  (`lib/agent/globalCap.ts`, `CHART_CHAT_GLOBAL_DAILY_LIMIT`, default 200; exact
-  only with a KV/Upstash store, otherwise per server instance), and per-request
-  input/output ceilings (`lib/agent/limits.ts`). Both routes pass client history
-  through `prepareMessages`, which also strips reasoning parts from earlier
-  turns — replayed thinking fails once history is trimmed or the system prompt
-  changes. Keep new chat routes on the same path.
+- To test the chat locally, put `ANTHROPIC_API_KEY=...` in `.env.local` (name and
+  value on one line; the bare key alone is not read).
 
 ## Design ("Almanac")
 
@@ -93,17 +98,20 @@ The look is a printed statistical almanac, sharing one hue with joeflynnpm.com.
 - Buttons are ink (`bg-gray-900 text-gray-50`, inverted in dark mode). The
   accent is for links, the focused input, and the one thing on a chart the eye
   should land on.
-- Charts: a single dataset labels its lines at their ends (legend only below
-  520px wide and on overlays); hovering a line fades the others; no vertical
+- Charts: a single dataset labels its lines at their ends. Below 520px wide,
+  and on overlays, a wrapping HTML legend sits under the plot: one entry per
+  entity (colour) and, on overlays, one per dataset (dash). ECharts' own legend
+  is not used. hovering a line fades the others; no vertical
   gridlines. Chart chrome colours in `ChartRenderer.tsx` are hex copies of the
   Tailwind neutrals because canvas cannot parse `oklch()`.
 - The front page (`app/page.tsx`) leads with one chart whose headline is
   written from the series' own first and last values, then ready-made overlays,
   then the indicators as small multiples. Don't add feature cards or a hero.
+  Its one box (`components/chat/HomeAsk`) searches as you type and asks on Enter.
 - Copy: plain sentences, no em-dash asides, no decorative glyphs or arrows.
 
 ## Verification
 
 - `npm run build` and `npm test` after changes; check `npm run dev` for visual
-  regressions on `/`, `/chart/life-expectancy`, `/overlay`, and `/agent`, in both
-  themes.
+  regressions on `/`, `/chart/life-expectancy`, and `/overlay`, in both themes.
+  With a key in `.env.local`, ask one question on each.

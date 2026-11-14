@@ -1,7 +1,7 @@
-// Builds the grounding context for chart chat ("Ask about this chart").
-// Unlike the full agent — which only ever sees statistical previews — chart
-// chat is scoped to one chart (or one overlay of a few charts), so we can
-// afford to inline a downsampled copy of the actual series. That lets the
+// Builds the grounding context for the chat when a chart is on screen.
+// With nothing in view the model only sees statistical previews (via
+// fetch_series); with a chart or an overlay in view we can afford to inline
+// a thinned copy of the actual series. That lets the
 // model quote real values, years, and turning points instead of hand-waving.
 
 import { toEntitySeries } from "../owid/parse";
@@ -27,6 +27,24 @@ export function downsamplePoints(
     out.push(points[Math.round(i * step)]);
   }
   return out;
+}
+
+const RECENT_POINTS_KEPT = 12;
+
+// Sampling for the model's copy of a series. People ask about recent years
+// far more than old ones ("what happened in 2020?"), and even thinning would
+// drop some of them, so the latest points are kept in full and only the
+// earlier history is thinned.
+export function sampleForContext(
+  points: [number, number][],
+  maxPoints: number = MAX_POINTS_PER_SERIES,
+  recent: number = RECENT_POINTS_KEPT
+): [number, number][] {
+  if (points.length <= maxPoints) return points;
+  const keep = Math.min(recent, maxPoints - 2);
+  const head = points.slice(0, points.length - keep);
+  const tail = points.slice(points.length - keep);
+  return [...downsamplePoints(head, maxPoints - keep), ...tail];
 }
 
 const fmt = (n: number) => String(Number(n.toPrecision(5)));
@@ -77,13 +95,16 @@ export function buildChartContext(
     );
   }
 
-  lines.push("", "Data (downsampled to at most 40 points per series, as year: value):");
+  lines.push(
+    "",
+    "Data (at most 40 points per series: the latest 12 in full, earlier years thinned; as year: value):"
+  );
   let seriesCount = 0;
   for (const column of data.columns) {
     for (const series of toEntitySeries(data, column)) {
       if (seriesCount >= MAX_SERIES) break;
       seriesCount++;
-      const pts = downsamplePoints(series.points)
+      const pts = sampleForContext(series.points)
         .map(([year, value]) => `${year}: ${fmt(value)}`)
         .join(", ");
       lines.push(`${column} — ${series.entity} (${series.code}): ${pts}`);

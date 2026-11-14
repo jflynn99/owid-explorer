@@ -1,5 +1,5 @@
 import Link from "next/link";
-import SearchBox from "@/components/search/SearchBox";
+import HomeAsk from "@/components/chat/HomeAsk";
 import Sparkline from "@/components/charts/Sparkline";
 import LeadChart from "@/components/charts/LeadChart";
 import { fetchChartCsv, fetchChartMetadata } from "@/lib/owid/client";
@@ -139,8 +139,8 @@ export default async function HomePage() {
             )}
           </h1>
           <p className="mt-4 max-w-md text-gray-700 dark:text-slate-300">
-            Charts drawn from Our World in Data. Put any two series on the same axes, change the
-            countries and years, and ask questions of what you see.
+            Charts drawn from Our World in Data. Search for one, put any two on the same axes, or
+            ask a question in plain words and get the chart back.
           </p>
           <Link
             href={`/chart/${LEAD}`}
@@ -161,7 +161,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mt-12">
-        <SearchBox placeholder="Search thousands of charts: try “life expectancy”" />
+        <HomeAsk />
       </section>
 
       <section className="mt-12">

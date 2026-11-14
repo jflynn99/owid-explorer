@@ -1,4 +1,4 @@
-// The agent's four tools (SPEC.md §6). The LLM never generates chart code —
+// The chat's four tools (SPEC.md §6), available on every surface. The LLM never generates chart code —
 // compose_chart validates a declarative ChartSpec and the client renders it.
 
 import { tool } from "ai";
@@ -9,8 +9,7 @@ import { parseChartCsv } from "../owid/parse";
 import type { SearchChartResult, SearchPageResult } from "../owid/types";
 import { buildSeriesPreview } from "./preview";
 
-// OWID article retrieval — shared between the full agent (as explain_chart)
-// and the chart-page chat (as owid_articles).
+// OWID article retrieval, exposed to the model as explain_chart.
 export const owidArticlesTool = tool({
   description:
     "Retrieve OWID's own articles (CC-BY) about a topic, to ground an explanation of a " +

@@ -51,9 +51,14 @@ export default function ChartRenderer({
     return () => observer.disconnect();
   }, []);
 
-  const { option, caveats } = useMemo(() => {
+  const { option, caveats, legend } = useMemo(() => {
     const allCaveats: string[] = [...(spec.caveats ?? [])];
     const echartsSeries: object[] = [];
+    // The legend mirrors the encoding: one entry per entity (its colour) and,
+    // on overlays, one per dataset (its dash pattern). Drawn as HTML under
+    // the chart so it wraps on a phone instead of paginating.
+    const legendEntities = new Map<string, string>();
+    const legendSeries: { name: string; dash: number[] | undefined }[] = [];
     // Colour = entity, dash pattern = series: the same country keeps the same
     // colour across overlaid datasets (lib/chartColors.ts). Theme-aware: the
     // dark palette is the same hues re-stepped for the dark surface.
@@ -75,10 +80,17 @@ export default function ChartRenderer({
       // "Title — Entity", too long to hang off the right edge.
       const multiRef = spec.series.length > 1;
       const endLabels = !multiRef && !narrow;
+      if (multiRef) {
+        legendSeries.push({ name: meta?.titleShort ?? ref.column, dash: seriesDash(refIndex) });
+      }
       for (const entitySeries of transformed) {
         const name = multiRef
           ? `${meta?.titleShort ?? ref.column} — ${entitySeries.entity}`
           : entitySeries.entity;
+        const lineColor = ref.color ?? colorFor(entitySeries.code || entitySeries.entity);
+        if (!legendEntities.has(entitySeries.entity)) {
+          legendEntities.set(entitySeries.entity, lineColor);
+        }
         echartsSeries.push({
           type: "line",
           name,
@@ -104,7 +116,7 @@ export default function ChartRenderer({
             },
             labelLayout: { moveOverlap: "shiftY" },
           }),
-          color: ref.color ?? colorFor(entitySeries.code || entitySeries.entity),
+          color: lineColor,
         });
       }
     }
@@ -118,9 +130,9 @@ export default function ChartRenderer({
     // neutrals in tailwind.config.ts (canvas cannot parse oklch()):
     // gray-600/slate-400 for text, gray-400/slate-600 for the axis,
     // gray-200/slate-800 for rules.
-    const text = isDark ? "#a8a59f" : "#5a5650";
-    const axisLine = isDark ? "#57544f" : "#a8a59f";
-    const splitLine = isDark ? "#2b2926" : "#e6e3de";
+    const text = isDark ? "#a5a19c" : "#56524d";
+    const axisLine = isDark ? "#585551" : "#a6a09b";
+    const splitLine = isDark ? "#282623" : "#e8e4df";
     const directLabels = spec.series.length === 1 && !narrow;
 
     const yAxes: object[] = [
@@ -154,16 +166,7 @@ export default function ChartRenderer({
         left: 52,
         right: spec.axes.right ? 60 : directLabels ? 140 : 24,
         top: 40,
-        bottom: directLabels ? 32 : 72,
-      },
-      legend: {
-        show: !directLabels,
-        bottom: 0,
-        type: "scroll",
-        icon: "roundRect",
-        itemWidth: 18,
-        itemHeight: 3,
-        textStyle: { color: isDark ? "#d6d3cd" : "#3d3a35" },
+        bottom: 32,
       },
       tooltip: {
         trigger: "axis",
@@ -192,7 +195,13 @@ export default function ChartRenderer({
       series: echartsSeries,
     };
 
-    return { option, caveats: allCaveats };
+    return {
+      option,
+      caveats: allCaveats,
+      legend: directLabels
+        ? null
+        : { entities: [...legendEntities].map(([name, color]) => ({ name, color })), series: legendSeries },
+    };
   }, [spec, data, columns, population, isDark, narrow]);
 
   return (
@@ -201,6 +210,32 @@ export default function ChartRenderer({
         option={option}
         ariaLabel={`Line chart: ${spec.title}, ${spec.timeRange[0]} to ${spec.timeRange[1]}. Data table alternative in the citation below.`}
       />
+      {legend && (
+        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-700 dark:text-slate-300">
+          {legend.entities.map((e) => (
+            <span key={e.name} className="inline-flex items-center gap-1.5">
+              <span aria-hidden="true" className="h-0.5 w-4" style={{ backgroundColor: e.color }} />
+              {e.name}
+            </span>
+          ))}
+          {legend.series.map((sr) => (
+            <span key={sr.name} className="inline-flex items-center gap-1.5">
+              <svg aria-hidden="true" width="26" height="6" className="text-gray-900 dark:text-slate-100">
+                <line
+                  x1="0"
+                  x2="26"
+                  y1="3"
+                  y2="3"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeDasharray={sr.dash?.join(" ")}
+                />
+              </svg>
+              {sr.name}
+            </span>
+          ))}
+        </div>
+      )}
       {caveats.length > 0 && (
         <ul className="mt-2 space-y-1">
           {caveats.map((c, i) => (

@@ -428,3 +428,40 @@ last so any model downgrade lands only on mechanical units. Each unit ships
 independently behind its own `npm run build` + `npm test` gate — every unit
 boundary is a clean handoff seam. See `WORKPLAN.md` for the per-unit detail and the
 recommended sequence.
+
+---
+
+## v4: one chat everywhere (November 2026)
+
+This section supersedes §7 and §7a where they differ, and the `/agent` page
+described in the route tree above.
+
+**What changed**
+
+- There is no agent page. One chat runs on three surfaces through one route,
+  `/api/chat`, which takes a `surface` (`home`, `chart`, `overlay`) and, when a
+  chart is on screen, a `view` describing it.
+- Front page: one box. Typing searches charts; Enter asks the question. A chart
+  the model composes is drawn under the reply.
+- Chart page: questions about the chart, grounded in its inlined data, plus
+  comparisons drawn under the reply.
+- Overlay builder: the same, and a composed chart replaces the one on the page.
+  It goes through the same URL update as a manual edit, so the URL is still the
+  only state and the browser's Back button undoes a change.
+- The principles are unchanged: the model emits ChartSpecs, never chart code
+  (§1.2); charts, search, and overlays work with no LLM (§1.1); every chart is
+  cited (§1.4); overlays carry the correlation caveat (§1.5).
+
+**Who pays**
+
+- The deployment's key funds every surface, under a per-visitor daily quota, a
+  site-wide daily cap, and per-request ceilings (input size, tool rounds, reply
+  length). One question costs one unit of quota whatever it does.
+- A visitor's own key, added through "Use your own key" under any chat box,
+  bypasses the quotas. It stays in their browser and is never stored server-side.
+- `LLM_PROVIDER` no longer switches funding modes. It is only needed for Ollama.
+
+**Design**
+
+The "Almanac" look (one warm hue, display serif, rules in place of cards, lines
+labelled at their ends) is specified in CLAUDE.md under "Design".

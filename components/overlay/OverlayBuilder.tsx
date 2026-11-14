@@ -18,7 +18,8 @@ import { seriesKey } from "@/lib/chartSpec";
 import type { ColumnMeta, EntitiesResponse, EntitySeries, GrapherMetadata } from "@/lib/owid/types";
 import ChartRenderer from "@/components/charts/ChartRenderer";
 import CitationFooter from "@/components/charts/CitationFooter";
-import ChartChat from "@/components/agent/ChartChat";
+import ChatPanel from "@/components/chat/ChatPanel";
+import EntityPicker from "@/components/charts/EntityPicker";
 import SearchBox from "@/components/search/SearchBox";
 
 interface Props {
@@ -40,8 +41,6 @@ function autoTitle(series: SeriesRef[], columns: Record<string, ColumnMeta>): st
 export default function OverlayBuilder({ spec, data, columns, population }: Props) {
   const router = useRouter();
   const [entityOptions, setEntityOptions] = useState<EntitiesResponse | null>(null);
-  const [entityPickerOpen, setEntityPickerOpen] = useState(false);
-  const [entityFilter, setEntityFilter] = useState("");
   const [years, setYears] = useState<[string, string]>([
     String(spec.timeRange[0]),
     String(spec.timeRange[1]),
@@ -192,9 +191,6 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
   const allNormalised = spec.series.every((r) =>
     isNormalisedUnit(columns[seriesKey(r)]?.unit)
   );
-  const filteredEntities = (entityOptions?.entities ?? [])
-    .filter((e) => e.entity.toLowerCase().includes(entityFilter.trim().toLowerCase()))
-    .slice(0, 200);
 
   return (
     <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem]">
@@ -321,57 +317,18 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
 
         <section>
           <h2 className="border-t border-gray-900 pt-2 font-display text-base font-semibold dark:border-slate-100">Countries</h2>
-          <div className="mt-2 flex flex-wrap gap-1">
-            {spec.entities.map((code) => {
-              const name = entityOptions?.entities.find((e) => e.code === code)?.entity ?? code;
-              return (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => toggleEntity(code)}
-                  aria-label={`Remove ${name}`}
-                  title="Remove"
-                  className="rounded-sm border border-gray-300 px-2 py-1 text-xs text-gray-800 hover:border-red-400 hover:text-red-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-red-400 dark:hover:text-red-300"
-                >
-                  {name} ×
-                </button>
-              );
-            })}
+          <div className="mt-2">
+            <EntityPicker
+              selected={spec.entities}
+              options={entityOptions}
+              onToggle={toggleEntity}
+              names={Object.fromEntries(
+                Object.values(data)
+                  .flat()
+                  .map((s) => [s.code || s.entity, s.entity])
+              )}
+            />
           </div>
-          <button
-            type="button"
-            onClick={() => setEntityPickerOpen((v) => !v)}
-            className="mt-2 min-h-11 lg:min-h-0 rounded-sm border border-gray-300 dark:border-slate-700 bg-paper dark:bg-slate-950 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-slate-900"
-          >
-            {entityPickerOpen ? "Close" : "Add country ▾"}
-          </button>
-          {entityPickerOpen && (
-            <div className="mt-1 rounded-sm border border-gray-200 dark:border-slate-800 bg-paper dark:bg-slate-950 p-2">
-              <input
-                type="search"
-                value={entityFilter}
-                onChange={(e) => setEntityFilter(e.target.value)}
-                placeholder="Filter…"
-                aria-label="Filter countries"
-                className="mb-2 w-full rounded-sm border border-gray-300 dark:border-slate-700 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <ul className="max-h-48 overflow-auto text-sm">
-                {!entityOptions && <li className="px-2 py-1 text-gray-500 dark:text-slate-400">Loading…</li>}
-                {filteredEntities.map((e) => (
-                  <li key={e.code}>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 hover:bg-gray-100 dark:hover:bg-slate-800">
-                      <input
-                        type="checkbox"
-                        checked={spec.entities.includes(e.code)}
-                        onChange={() => toggleEntity(e.code)}
-                      />
-                      {e.entity}
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </section>
 
         <section>
@@ -405,11 +362,18 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
       </aside>
 
       <div className="lg:col-start-1 lg:row-start-2">
-        <ChartChat
-          series={spec.series.map((r) => ({ slug: r.slug, column: r.column }))}
-          entities={spec.entities}
-          timeRange={spec.timeRange}
-          transforms={spec.transforms}
+        {/* A chart the chat composes replaces this one: same path as every
+            manual edit, so the URL stays the single source of truth. */}
+        <ChatPanel
+          surface="overlay"
+          view={{
+            series: spec.series.map((r) => ({ slug: r.slug, column: r.column })),
+            entities: spec.entities,
+            timeRange: spec.timeRange,
+            transforms: spec.transforms,
+            spec,
+          }}
+          onSpec={push}
         />
       </div>
     </div>

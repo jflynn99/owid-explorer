@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s · OWID Explorer",
   },
   description:
-    "Explore, combine and explain Our World in Data — interactive charts, overlays, and free AI chat on every chart.",
+    "Explore, combine, and question Our World in Data: interactive charts, overlays, and a chat that draws the chart you ask for.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -39,9 +39,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="flex items-center gap-5 text-sm">
               <Link href="/overlay" className="py-1 text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100">
                 Overlay
-              </Link>
-              <Link href="/agent" className="py-1 text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100">
-                Agent
               </Link>
               <a
                 href="https://ourworldindata.org"

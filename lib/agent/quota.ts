@@ -1,4 +1,4 @@
-// Daily quota for the server-funded "Ask about this chart" feature.
+// Per-visitor daily quota for chat that runs on the deployment's own key.
 //
 // Zero-infrastructure design: the count lives in an HMAC-signed cookie, so no
 // KV store is needed. A visitor can reset it by clearing cookies — acceptable
@@ -21,7 +21,7 @@ export function todayUtc(now: Date = new Date()): string {
   return now.toISOString().slice(0, 10);
 }
 
-// CHART_CHAT_DAILY_LIMIT=0 disables server-funded chart chat entirely.
+// CHART_CHAT_DAILY_LIMIT=0 disables server-funded chat entirely.
 export function dailyLimit(env: Env = process.env): number {
   const raw = env.CHART_CHAT_DAILY_LIMIT;
   if (raw === undefined || raw === "") return DEFAULT_DAILY_LIMIT;

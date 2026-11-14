@@ -10,11 +10,11 @@
 // the dark set is the same eight hues re-stepped for the dark surface, so an
 // entity keeps its hue identity across themes. Designed in OKLCH, shipped as
 // hex because ECharts' colour parser doesn't understand oklch() strings.
-// Validated 2026-07-18 with the skill's validate_palette.js against this
-// app's real chart surfaces (#ffffff light, slate-900 dark): every hard gate
+// Validated 2026-11-14 with the skill's validate_palette.js against this
+// app's chart surfaces (paper #fdf9f6 light, #110f0e dark): every hard gate
 // passes in both modes. Known WARN: light-mode slots 3-5 (magenta, yellow,
-// aqua) sit below 3:1 contrast on white — mitigated by the always-on legend
-// and the axis tooltip, same as the palette these replaced.
+// aqua) sit below 3:1 contrast on paper, which is allowed only because every
+// line is also named in text: at its end, or in the legend under the chart.
 export const PALETTE = [
   "#2a78d6", // blue
   "#008300", // green
