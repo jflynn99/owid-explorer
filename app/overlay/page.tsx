@@ -14,11 +14,10 @@ import OverlayStart from "@/components/overlay/OverlayStart";
 
 export const metadata: Metadata = { title: "Overlay builder" };
 
-export default async function OverlayPage({
-  searchParams,
-}: {
-  searchParams: { s?: string };
+export default async function OverlayPage(props: {
+  searchParams: Promise<{ s?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   if (!searchParams.s) return <OverlayStart />;
 
   const decoded = decodeSpec(searchParams.s);

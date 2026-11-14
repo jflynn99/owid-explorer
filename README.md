@@ -56,7 +56,7 @@ needed for the agent (Phase 3); see `.env.example`.
 
 ## Deploying
 
-Deploy as a standard Next.js project on Vercel (or anywhere Next.js 14 runs) —
+Deploy as a standard Next.js project on Vercel (or anywhere Next.js 16 runs) —
 no special configuration and no required env vars. OWID responses are cached at
 the edge (24h + stale-while-revalidate). Optional agent env vars are in
 `.env.example`.

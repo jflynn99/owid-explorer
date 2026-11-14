@@ -20,9 +20,10 @@ summary.
 
 ## Context
 
-- Standalone Next.js 14 app (originally built inside the joeflynnpm.com repo,
+- Standalone Next.js 16 app (React 19) (originally built inside the joeflynnpm.com repo,
   extracted in Phase 4).
-- Commands: `npm run dev`, `npm run build`, `npm test` (vitest).
+- Commands: `npm run dev`, `npm run build`, `npm test` (vitest),
+  `npm run typecheck`. Page `params` / `searchParams` are Promises: await them.
 
 ## Architecture rules
 
