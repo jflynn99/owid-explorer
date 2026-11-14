@@ -11,12 +11,12 @@ export default function AgentPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">The full agent — bring your own key</h1>
-      <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-        A natural-language agent over all of Our World in Data — it searches, composes charts and
-        overlays, and explains them with cited OWID articles. Unlimited with your own API key
-        (stored in this browser only). For quick questions about a single chart, just ask on any
-        chart page — a few free questions a day, no key needed.
+      <h1 className="font-display text-4xl font-semibold leading-tight">The agent</h1>
+      <p className="mt-2 max-w-3xl text-gray-700 dark:text-slate-300">
+        Ask in plain language and it searches Our World in Data, builds the chart or overlay, and
+        explains it with cited OWID articles. It runs on your own API key, which stays in this
+        browser. For a quick question about one chart, ask on the chart page instead: a few a day
+        are free.
       </p>
       <div className="mt-6">
         <ChatPanel serverConfigured={serverConfigured} />

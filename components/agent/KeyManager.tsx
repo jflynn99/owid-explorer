@@ -59,7 +59,7 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
 
   if (saved) {
     return (
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-sm">
+      <div className="flex items-center justify-between rounded-sm border border-gray-200 dark:border-slate-800 bg-paper dark:bg-slate-950 px-3 py-2 text-sm">
         <span className="text-gray-600 dark:text-slate-300">
           Using your <span className="font-medium">{saved.provider}</span> key (stored in this
           browser only)
@@ -72,7 +72,7 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+    <div className="rounded-sm border border-gray-200 dark:border-slate-800 bg-paper dark:bg-slate-950 p-4">
       <h3 className="text-sm font-semibold">Add an API key to enable the agent</h3>
       <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
         Your key is stored in this browser&apos;s localStorage and sent only with your own chat
@@ -82,7 +82,7 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
         <select
           value={provider}
           onChange={(e) => setProvider(e.target.value as LlmConfig["provider"])}
-          className="rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 text-sm"
+          className="rounded-sm border border-gray-300 dark:border-slate-700 px-2 py-1.5 text-sm"
           aria-label="LLM provider"
         >
           <option value="anthropic">Anthropic</option>
@@ -93,14 +93,14 @@ export default function KeyManager({ onChange }: { onChange: (config: LlmConfig 
           value={key}
           onChange={(e) => setKey(e.target.value)}
           placeholder={provider === "anthropic" ? "sk-ant-…" : "sk-…"}
-          className="min-w-64 flex-1 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 text-sm"
+          className="min-w-64 flex-1 rounded-sm border border-gray-300 dark:border-slate-700 px-2 py-1.5 text-sm"
           aria-label="API key"
         />
         <button
           type="button"
           onClick={save}
           disabled={!key.trim()}
-          className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-sm px-3 py-1.5 text-sm bg-gray-900 text-gray-50 hover:bg-gray-700 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-slate-300 disabled:opacity-50"
         >
           Save
         </button>

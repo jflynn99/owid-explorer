@@ -61,19 +61,19 @@ export default function SearchBox({
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-xl">
+    <div ref={containerRef} className="relative w-full">
       <input
         type="search"
         value={query}
         autoFocus={autoFocus}
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => results.length > 0 && setOpen(true)}
-        placeholder={placeholder ?? "Search OWID charts — try “life expectancy”"}
+        placeholder={placeholder ?? "Search OWID charts: try “life expectancy”"}
         aria-label="Search OWID charts"
-        className="w-full rounded-lg border border-gray-300 dark:border-slate-700 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-full rounded-none border-0 border-b-2 border-gray-400 bg-transparent px-0 py-2 text-lg placeholder:text-gray-500 focus:border-blue-600 focus:outline-none dark:border-slate-600 dark:placeholder:text-slate-500 dark:focus:border-blue-400"
       />
       {open && (
-        <ul className="absolute z-10 mt-1 max-h-96 w-full overflow-auto rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg">
+        <ul className="absolute z-10 max-h-96 w-full overflow-auto border border-t-0 border-gray-900 bg-paper dark:border-slate-100 dark:bg-slate-950">
           {loading && results.length === 0 && (
             <li className="px-4 py-2 text-sm text-gray-500 dark:text-slate-400">Searching…</li>
           )}

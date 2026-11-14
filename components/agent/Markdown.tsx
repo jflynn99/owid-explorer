@@ -48,7 +48,7 @@ export default function Markdown({ children }: { children: string }) {
           ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-0.5 last:mb-0">{children}</ol>,
           li: ({ children }) => <li>{children}</li>,
           code: ({ children }) => (
-            <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-[0.85em] dark:bg-slate-800">
+            <code className="rounded-sm bg-gray-100 px-1 py-0.5 font-mono text-[0.85em] dark:bg-slate-800">
               {children}
             </code>
           ),

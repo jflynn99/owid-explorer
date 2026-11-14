@@ -64,7 +64,7 @@ export default async function ChartPage(props: PageProps) {
   } catch {
     return (
       <div>
-        <h1 className="text-2xl font-bold">{meta.chart.title}</h1>
+        <h1 className="font-display text-3xl font-semibold leading-tight">{meta.chart.title}</h1>
         <p className="mt-4 text-gray-500 dark:text-slate-400">
           Couldn&apos;t load this data from OWID right now. Please try again shortly.
         </p>
@@ -78,7 +78,7 @@ export default async function ChartPage(props: PageProps) {
   if (data.rows.length === 0) {
     return (
       <div>
-        <h1 className="text-2xl font-bold">{meta.chart.title}</h1>
+        <h1 className="font-display text-3xl font-semibold leading-tight">{meta.chart.title}</h1>
         <p className="mt-4 text-gray-500 dark:text-slate-400">
           No data for this selection. Try different countries or a wider time range.
         </p>
@@ -111,20 +111,22 @@ export default async function ChartPage(props: PageProps) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">{meta.chart.title}</h1>
-      {meta.chart.subtitle && <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">{meta.chart.subtitle}</p>}
+      <h1 className="font-display text-4xl font-semibold leading-tight">{meta.chart.title}</h1>
+      {meta.chart.subtitle && (
+        <p className="mt-2 max-w-3xl text-gray-700 dark:text-slate-300">{meta.chart.subtitle}</p>
+      )}
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <ChartControls slug={slug} selectedCodes={selectedCodes} timeRange={timeRange} />
         <Link
           href={`/overlay?s=${encodeSpec(spec)}`}
-          className="py-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          className="py-1 text-sm font-medium underline decoration-blue-500 decoration-2 underline-offset-4 hover:text-blue-700 dark:hover:text-blue-300"
         >
-          Compare with another series →
+          Compare with another series
         </Link>
       </div>
 
-      <div className="mt-4 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+      <div className="mt-4 border-t border-gray-900 pt-2 dark:border-slate-100">
         <ChartRenderer spec={spec} data={seriesData} columns={columnMeta} />
         <CitationFooter
           columns={Object.values(columnMeta)}

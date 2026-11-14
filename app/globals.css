@@ -11,6 +11,17 @@
   color-scheme: dark;
 }
 
+/* Numbers line up in columns everywhere: this is a data site. */
+body {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Display serif for titles (Fraunces, loaded in app/layout.tsx). */
+.font-display {
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+}
+
 /* Typography: balanced headings, no orphan words in body text */
 h1,
 h2,

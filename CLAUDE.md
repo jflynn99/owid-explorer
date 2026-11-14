@@ -77,7 +77,33 @@ summary.
   turns — replayed thinking fails once history is trimmed or the system prompt
   changes. Keep new chat routes on the same path.
 
+## Design ("Almanac")
+
+The look is a printed statistical almanac, sharing one hue with joeflynnpm.com.
+
+- One hue drives everything: `HUE` in `tailwind.config.ts` (amber, 70). The
+  class names are still `gray` (light neutrals), `slate` (dark neutrals), and
+  `blue` (the accent ladder, amber despite the name), so existing `dark:`
+  variants keep working. `bg-paper` is the light page surface.
+- Type: Fraunces (`font-display`) for titles and big figures only; body text is
+  the system font stack. Numbers are tabular site-wide.
+- Surfaces: hairline rules, not cards. A heavy rule (`border-t border-gray-900`
+  / `dark:border-slate-100`) opens a section or a chart; light rules divide
+  rows. No shadows, no gradients, corners `rounded-sm` at most.
+- Buttons are ink (`bg-gray-900 text-gray-50`, inverted in dark mode). The
+  accent is for links, the focused input, and the one thing on a chart the eye
+  should land on.
+- Charts: a single dataset labels its lines at their ends (legend only below
+  520px wide and on overlays); hovering a line fades the others; no vertical
+  gridlines. Chart chrome colours in `ChartRenderer.tsx` are hex copies of the
+  Tailwind neutrals because canvas cannot parse `oklch()`.
+- The front page (`app/page.tsx`) leads with one chart whose headline is
+  written from the series' own first and last values, then ready-made overlays,
+  then the indicators as small multiples. Don't add feature cards or a hero.
+- Copy: plain sentences, no em-dash asides, no decorative glyphs or arrows.
+
 ## Verification
 
 - `npm run build` and `npm test` after changes; check `npm run dev` for visual
-  regressions on `/` and `/chart/life-expectancy`.
+  regressions on `/`, `/chart/life-expectancy`, `/overlay`, and `/agent`, in both
+  themes.

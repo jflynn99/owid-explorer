@@ -76,19 +76,19 @@ export default function ChartControls({
         <button
           type="button"
           onClick={() => setPickerOpen((v) => !v)}
-          className="rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+          className="rounded-sm border border-gray-400 dark:border-slate-600 bg-paper dark:bg-slate-950 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-slate-900"
         >
           Countries ({selectedCodes.length}) ▾
         </button>
         {pickerOpen && (
-          <div className="absolute z-20 mt-1 w-72 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-lg">
+          <div className="absolute z-20 mt-1 w-72 rounded-sm border border-gray-900 dark:border-slate-100 bg-paper dark:bg-slate-950 p-2">
             <input
               type="search"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter…"
               aria-label="Filter countries"
-              className="mb-2 w-full rounded border border-gray-300 dark:border-slate-700 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mb-2 w-full rounded-sm bg-transparent border border-gray-400 dark:border-slate-600 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <ul className="max-h-64 overflow-auto">
               {!available && <li className="px-2 py-1 text-sm text-gray-500 dark:text-slate-400">Loading…</li>}
@@ -116,7 +116,7 @@ export default function ChartControls({
           value={years[0]}
           onChange={(e) => setYears([e.target.value, years[1]])}
           aria-label="From year"
-          className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-20 rounded-sm bg-transparent border border-gray-400 dark:border-slate-600 px-2 py-1.5 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <label className="text-gray-500 dark:text-slate-400">to</label>
         <input
@@ -124,12 +124,12 @@ export default function ChartControls({
           value={years[1]}
           onChange={(e) => setYears([years[0], e.target.value])}
           aria-label="To year"
-          className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-20 rounded-sm bg-transparent border border-gray-400 dark:border-slate-600 px-2 py-1.5 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <button
           type="button"
           onClick={applyTime}
-          className="rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+          className="rounded-sm border border-gray-400 dark:border-slate-600 bg-paper dark:bg-slate-950 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-900"
         >
           Apply
         </button>

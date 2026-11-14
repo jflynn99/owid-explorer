@@ -53,13 +53,13 @@ export default function OverlayStart() {
   }
 
   return (
-    <div className="flex flex-col items-center pt-12">
-      <h1 className="text-2xl font-bold tracking-tight">Overlay builder</h1>
-      <p className="mt-2 max-w-md text-center text-sm text-gray-500 dark:text-slate-400">
-        Combine any two OWID series on one chart — dual axes, index-to-100, log and
+    <div>
+      <h1 className="font-display text-4xl font-semibold leading-tight">Overlay builder</h1>
+      <p className="mt-2 max-w-2xl text-gray-700 dark:text-slate-300">
+        Put any two OWID series on one chart, with dual axes, index-to-100, per-capita, log, and
         z-score transforms. Start by picking the first series.
       </p>
-      <div className="mt-6 w-full max-w-xl">
+      <div className="mt-8 w-full">
         <SearchBox autoFocus placeholder="Search for the first series…" onSelect={(r) => start(r.slug)} />
       </div>
       {loading && <p className="mt-3 text-sm text-gray-500 dark:text-slate-400">Loading chart…</p>}
