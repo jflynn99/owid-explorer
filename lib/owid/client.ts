@@ -3,7 +3,7 @@
 // components. See SPEC.md §4.
 
 import type { EntitiesResponse, GrapherMetadata, SearchResponse } from "./types";
-import { parseChartCsv } from "./parse";
+import { parseChartCsv, parseCsv } from "./parse";
 
 const OWID_BASE = "https://ourworldindata.org";
 export const OWID_REVALIDATE_SECONDS = 86400; // OWID data changes slowly
@@ -39,6 +39,24 @@ export interface CsvFilter {
   timeRange?: [number, number];
 }
 
+const csvField = (value: string) => (/[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value);
+
+// Keeps only the rows for the requested entities (matched on name or code).
+// OWID applies the `country` filter itself for line charts, so this is a
+// no-op there. Scatter-type charts ("X vs. Y") ignore it and return every
+// country, which would otherwise draw two hundred lines.
+export function filterCsvToEntities(csv: string, entities: string[]): string {
+  const wanted = new Set(entities.map((e) => e.trim().toLowerCase()));
+  const rows = parseCsv(csv.trim());
+  if (rows.length < 2) return csv;
+  const [header, ...body] = rows;
+  const kept = body.filter(
+    (r) => wanted.has((r[0] ?? "").toLowerCase()) || wanted.has((r[1] ?? "").toLowerCase())
+  );
+  if (kept.length === body.length) return csv;
+  return [header, ...kept].map((r) => r.map(csvField).join(",")).join("\n");
+}
+
 export async function fetchChartCsv(slug: string, filter: CsvFilter = {}): Promise<string> {
   assertSlug(slug);
   const params = new URLSearchParams({
@@ -57,11 +75,18 @@ export async function fetchChartCsv(slug: string, filter: CsvFilter = {}): Promi
     // (the same form OWID's own single-country URLs use).
     params.set("country", entities.length === 1 ? `~${entities[0]}` : entities.join("~"));
   }
-  if (filter.timeRange) {
-    params.set("time", `${filter.timeRange[0]}..${filter.timeRange[1]}`);
-  }
+  // Always ask for a span of years. Left to its default, a scatter-type chart
+  // returns only its single display year (the same trap as map-default charts
+  // above, and `tab=line` does not help there).
+  params.set(
+    "time",
+    filter.timeRange ? `${filter.timeRange[0]}..${filter.timeRange[1]}` : "earliest..latest"
+  );
   const res = await owidFetch(`${OWID_BASE}/grapher/${slug}.csv?${params}`);
-  return res.text();
+  const csv = await res.text();
+  return filter.entities && filter.entities.length > 0
+    ? filterCsvToEntities(csv, filter.entities.slice(0, 50))
+    : csv;
 }
 
 export async function fetchChartMetadata(slug: string): Promise<GrapherMetadata> {
@@ -73,11 +98,17 @@ export async function fetchChartMetadata(slug: string): Promise<GrapherMetadata>
   return res.json();
 }
 
-// There is no cheap OWID endpoint listing a chart's entities, so derive it from
-// the full CSV server-side (cached). Never ship the full CSV to the browser.
+// There is no cheap OWID endpoint listing a chart's entities, so derive it
+// from the chart's FULL CSV server-side (cached; typically 0.3-2 MB). It has
+// to be the full one: the filtered CSV only contains the chart's default
+// selection, which for many charts is half a dozen regions, and the picker
+// would then offer nothing else. Never ship this CSV to the browser.
 export async function fetchChartEntities(slug: string): Promise<EntitiesResponse> {
   assertSlug(slug);
-  const csv = await fetchChartCsv(slug);
+  const res = await owidFetch(
+    `${OWID_BASE}/grapher/${slug}.csv?csvType=full&useColumnShortNames=true`
+  );
+  const csv = await res.text();
   const data = parseChartCsv(csv);
   const seen = new Map<string, string>();
   let minYear = Infinity;

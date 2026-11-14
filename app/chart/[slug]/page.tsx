@@ -75,6 +75,20 @@ export default async function ChartPage(props: PageProps) {
     );
   }
 
+  // Some charts (scatter-type ones especially) have no default selection, so
+  // everything comes back. Two hundred lines is not a chart: start from a
+  // handful of familiar entities and let the visitor change them.
+  if (!entities) {
+    const present = new Set(data.rows.map((r) => r.code || r.entity));
+    if (present.size > 12) {
+      const preferred = ["OWID_WRL", "USA", "CHN", "IND", "BRA", "NGA", "DEU"].filter((c) =>
+        present.has(c)
+      );
+      const chosen = new Set(preferred.length > 0 ? preferred : [...present].slice(0, 6));
+      data = { ...data, rows: data.rows.filter((r) => chosen.has(r.code || r.entity)) };
+    }
+  }
+
   if (data.rows.length === 0) {
     return (
       <div>
@@ -92,10 +106,16 @@ export default async function ChartPage(props: PageProps) {
   const timeRange: [number, number] =
     requestedTime ?? [Math.min(...years), Math.max(...years)];
 
+  // One axis, one unit. A chart whose columns are in different units (again,
+  // scatter-type charts: "% with electricity" and "GDP in $") shows the first
+  // column's unit here; the overlay builder is where two units go side by side.
+  const firstUnit = meta.columns[data.columns[0]]?.unit;
+  const plotted = data.columns.filter((c) => meta.columns[c]?.unit === firstUnit);
+
   const spec: ChartSpec = {
     v: 1,
     title: meta.chart.title,
-    series: data.columns.map((column) => ({ slug, column, axis: "left" as const })),
+    series: plotted.map((column) => ({ slug, column, axis: "left" as const })),
     transforms: [],
     axes: { left: { label: Object.values(meta.columns)[0]?.shortUnit || undefined } },
     entities: selectedCodes,

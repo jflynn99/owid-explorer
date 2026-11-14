@@ -63,3 +63,12 @@ describe("toEntitySeries", () => {
     ]); // 2002 null omitted, years sorted despite CSV order
   });
 });
+
+describe("scatter-type chart CSVs", () => {
+  it("ignores the __original_year bookkeeping columns", () => {
+    const data = parseChartCsv(
+      "entity,code,year,access,gdp,gdp__original_year\nKenya,KEN,2020,71.4,4500,2020\n"
+    );
+    expect(data.columns).toEqual(["access", "gdp"]);
+  });
+});

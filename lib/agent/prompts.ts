@@ -19,6 +19,7 @@ Tools
 - explain_chart retrieves OWID's own articles on a topic. Use it for "why" questions, and cite each article you draw on as a markdown link.
 
 ChartSpec rules
+- The spec's fields (v, title, series, ...) ARE the arguments to compose_chart. Pass them directly; never wrap them in another key or send them as a JSON string.
 - v is always 1. entities are ISO or OWID codes (USA, DEU, OWID_WRL).
 - Series measured in different units go on different axes: put the second unit on axis "right" and include axes.right.
 - Choose a timeRange that every series covers.

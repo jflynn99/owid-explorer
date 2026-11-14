@@ -60,7 +60,11 @@ export function parseChartCsv(text: string): ParsedChartData {
   const allColumns = header.slice(3);
   const body = raw.slice(1);
 
-  const isNumeric = allColumns.map((_, idx) =>
+  // Scatter-type charts carry "<column>__original_year" columns recording
+  // which year each value was taken from. They are numeric but they are
+  // bookkeeping, not a series anyone wants plotted.
+  const isNumeric = allColumns.map((name, idx) =>
+    !name.endsWith("__original_year") &&
     body.some((r) => {
       const cell = r[3 + idx];
       return cell !== "" && cell !== undefined && Number.isFinite(Number(cell));
