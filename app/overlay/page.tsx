@@ -24,7 +24,7 @@ export default async function OverlayPage(props: {
   if (!decoded.ok) {
     return (
       <div className="pt-12 text-center">
-        <h1 className="text-xl font-bold">Invalid overlay link</h1>
+        <h1 className="font-display text-2xl font-semibold">Invalid overlay link</h1>
         <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">{decoded.errors.join("; ")}</p>
         <Link href="/overlay" className="mt-4 inline-block text-sm text-blue-600 dark:text-blue-400 underline">
           Start a new overlay
@@ -70,7 +70,7 @@ export default async function OverlayPage(props: {
   } catch {
     return (
       <div className="pt-12 text-center">
-        <h1 className="text-xl font-bold">Could not load overlay data</h1>
+        <h1 className="font-display text-2xl font-semibold">Could not load overlay data</h1>
         <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">
           One of the charts in this overlay failed to load from OWID.
         </p>

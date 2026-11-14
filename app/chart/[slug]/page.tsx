@@ -64,7 +64,7 @@ export default async function ChartPage(props: PageProps) {
   } catch {
     return (
       <div>
-        <h1 className="text-2xl font-bold">{meta.chart.title}</h1>
+        <h1 className="font-display text-3xl font-semibold leading-tight">{meta.chart.title}</h1>
         <p className="mt-4 text-gray-500 dark:text-slate-400">
           Couldn&apos;t load this data from OWID right now. Please try again shortly.
         </p>
@@ -78,7 +78,7 @@ export default async function ChartPage(props: PageProps) {
   if (data.rows.length === 0) {
     return (
       <div>
-        <h1 className="text-2xl font-bold">{meta.chart.title}</h1>
+        <h1 className="font-display text-3xl font-semibold leading-tight">{meta.chart.title}</h1>
         <p className="mt-4 text-gray-500 dark:text-slate-400">
           No data for this selection. Try different countries or a wider time range.
         </p>

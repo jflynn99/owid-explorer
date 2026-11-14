@@ -18,7 +18,7 @@ export default function OverlayError({
 
   return (
     <div className="pt-12 text-center">
-      <h1 className="text-xl font-bold">Something went wrong with this overlay</h1>
+      <h1 className="font-display text-2xl font-semibold">Something went wrong with this overlay</h1>
       <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">
         This is usually temporary. Try again, or start a fresh overlay.
       </p>
@@ -26,7 +26,7 @@ export default function OverlayError({
         <button
           type="button"
           onClick={reset}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm shadow-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+          className="rounded-sm border border-gray-300 bg-paper px-3 py-1.5 text-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-950 dark:hover:bg-slate-800"
         >
           Try again
         </button>
