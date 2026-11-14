@@ -7,7 +7,7 @@ import { encodeSpec, seriesKey, type ChartSpec } from "@/lib/chartSpec";
 import ChartRenderer from "@/components/charts/ChartRenderer";
 import ChartControls from "@/components/charts/ChartControls";
 import CitationFooter from "@/components/charts/CitationFooter";
-import ChartChat from "@/components/agent/ChartChat";
+import ChatPanel from "@/components/chat/ChatPanel";
 import type { ColumnMeta, EntitySeries } from "@/lib/owid/types";
 
 // Next passes route params and the query string as Promises.
@@ -87,6 +87,7 @@ export default async function ChartPage(props: PageProps) {
   }
 
   const selectedCodes = [...new Set(data.rows.map((r) => r.code || r.entity))];
+  const entityNames = Object.fromEntries(data.rows.map((r) => [r.code || r.entity, r.entity]));
   const years = data.rows.map((r) => r.year);
   const timeRange: [number, number] =
     requestedTime ?? [Math.min(...years), Math.max(...years)];
@@ -117,7 +118,12 @@ export default async function ChartPage(props: PageProps) {
       )}
 
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <ChartControls slug={slug} selectedCodes={selectedCodes} timeRange={timeRange} />
+        <ChartControls
+          slug={slug}
+          selectedCodes={selectedCodes}
+          entityNames={entityNames}
+          timeRange={timeRange}
+        />
         <Link
           href={`/overlay?s=${encodeSpec(spec)}`}
           className="py-1 text-sm font-medium underline decoration-blue-500 decoration-2 underline-offset-4 hover:text-blue-700 dark:hover:text-blue-300"
@@ -134,7 +140,10 @@ export default async function ChartPage(props: PageProps) {
         />
       </div>
 
-      <ChartChat series={[{ slug }]} entities={selectedCodes} timeRange={timeRange} />
+      <ChatPanel
+        surface="chart"
+        view={{ series: [{ slug }], entities: selectedCodes, timeRange, spec }}
+      />
     </div>
   );
 }

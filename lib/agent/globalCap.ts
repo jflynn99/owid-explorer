@@ -1,4 +1,4 @@
-// Site-wide daily cap for the server-funded "Ask about this chart" feature.
+// Site-wide daily cap for chat that runs on the deployment's own key.
 //
 // The per-visitor quota (quota.ts) lives in a cookie, so it only limits
 // visitors who keep their cookies. This is the total across everyone: once the
@@ -17,9 +17,9 @@ import { todayUtc } from "./quota";
 
 type Env = Record<string, string | undefined>;
 
-export const DEFAULT_GLOBAL_DAILY_LIMIT = 200;
+export const DEFAULT_GLOBAL_DAILY_LIMIT = 100;
 
-// CHART_CHAT_GLOBAL_DAILY_LIMIT: unset -> 200. 0 -> no site-wide cap.
+// CHART_CHAT_GLOBAL_DAILY_LIMIT: unset -> 100. 0 -> no site-wide cap.
 export function globalDailyLimit(env: Env = process.env): number {
   const raw = env.CHART_CHAT_GLOBAL_DAILY_LIMIT;
   if (raw === undefined || raw === "") return DEFAULT_GLOBAL_DAILY_LIMIT;

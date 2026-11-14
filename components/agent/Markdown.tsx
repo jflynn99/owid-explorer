@@ -1,6 +1,6 @@
 "use client";
 
-// Shared markdown renderer for both chat surfaces (ChartChat, ChatPanel).
+// Shared markdown renderer for chat answers (components/chat/ChatTranscript).
 // Both system prompts tell the model to cite as [title](url) markdown links, so
 // assistant text must render as markdown — but from an LLM, safely.
 //

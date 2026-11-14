@@ -7,8 +7,13 @@ import {
   todayUtc,
   usedToday,
 } from "../lib/agent/quota";
-import { buildChartContext, buildChatContext, downsamplePoints } from "../lib/agent/chartContext";
-import { chartChatSystemPrompt } from "../lib/agent/prompts";
+import {
+  buildChartContext,
+  buildChatContext,
+  downsamplePoints,
+  sampleForContext,
+} from "../lib/agent/chartContext";
+import { chatSystemPrompt } from "../lib/agent/prompts";
 import { resolveServerFunded } from "../lib/agent/providers";
 import { parseChartCsv } from "../lib/owid/parse";
 import type { GrapherMetadata } from "../lib/owid/types";
@@ -151,13 +156,53 @@ United Kingdom,GBR,2020,80.4,1`;
   });
 });
 
-describe("chartChatSystemPrompt", () => {
-  it("embeds the context and the striking-fact opening rule", () => {
-    const prompt = chartChatSystemPrompt("THE-CONTEXT");
-    expect(prompt).toContain("THE-CONTEXT");
-    expect(prompt).toContain("most striking fact");
-    // The data-vs-interpretation separation must survive future edits.
-    expect(prompt).toContain("keep data facts and interpretation distinct");
+describe("sampleForContext", () => {
+  const long: [number, number][] = Array.from({ length: 200 }, (_, i) => [1824 + i, i]);
+
+  it("keeps the latest years in full and thins the rest", () => {
+    const out = sampleForContext(long, 40, 12);
+    expect(out).toHaveLength(40);
+    expect(out[0]).toEqual([1824, 0]);
+    // every one of the last 12 years is present, in order
+    expect(out.slice(-12).map(([year]) => year)).toEqual(
+      Array.from({ length: 12 }, (_, i) => 2012 + i)
+    );
+  });
+
+  it("leaves short series untouched", () => {
+    expect(sampleForContext(long.slice(0, 30), 40, 12)).toHaveLength(30);
+  });
+});
+
+describe("chatSystemPrompt", () => {
+  it("front page: tools and rules, no chart blocks", () => {
+    const prompt = chatSystemPrompt({ surface: "home", today: "2026-01-01" });
+    expect(prompt).toContain("search_indicators");
+    expect(prompt).toContain("front page");
+    expect(prompt).toContain("Today's date is 2026-01-01.");
+    expect(prompt).not.toContain("CHART DATA");
+  });
+
+  it("chart: embeds the grounding context", () => {
+    const prompt = chatSystemPrompt({ surface: "chart", context: "Chart title: Life expectancy" });
+    expect(prompt).toContain("CHART DATA\nChart title: Life expectancy");
+    expect(prompt).toContain("Never invent a figure");
+  });
+
+  it("overlay: embeds the current spec and tells the model its spec replaces the chart", () => {
+    const spec = {
+      v: 1 as const,
+      title: "T",
+      series: [{ slug: "life-expectancy", column: "life_expectancy_0", axis: "left" as const }],
+      transforms: [],
+      axes: { left: {} },
+      entities: ["OWID_WRL"],
+      timeRange: [1950, 2023] as [number, number],
+    };
+    const prompt = chatSystemPrompt({ surface: "overlay", context: "ctx", spec });
+    expect(prompt).toContain("CURRENT CHART SPEC");
+    expect(prompt).toContain('"life_expectancy_0"');
+    expect(prompt).toContain("COMPLETE new spec");
   });
 });
 

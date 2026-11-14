@@ -14,18 +14,19 @@ vi.mock("@/lib/owid/client", async (importOriginal) => {
   };
 });
 
-import { GET, POST } from "../app/api/chart-chat/route";
+import { GET, POST } from "../app/api/chat/route";
 import { resetGlobalCapForTests } from "../lib/agent/globalCap";
-import { CHART_CHAT_MAX_INPUT_CHARS } from "../lib/agent/limits";
+import { CHAT_MAX_INPUT_CHARS } from "../lib/agent/limits";
 
 const VALID_BODY = {
-  series: [{ slug: "life-expectancy" }],
+  surface: "chart",
+  view: { series: [{ slug: "life-expectancy" }] },
   messages: [{ role: "user", parts: [{ type: "text", text: "why?" }] }],
 };
 
 function post(body: unknown, headers: Record<string, string> = {}) {
   return POST(
-    new NextRequest("http://localhost/api/chart-chat", {
+    new NextRequest("http://localhost/api/chat", {
       method: "POST",
       body: JSON.stringify(body),
       headers,
@@ -45,15 +46,28 @@ afterEach(() => {
   resetGlobalCapForTests();
 });
 
-describe("POST /api/chart-chat branches", () => {
+describe("POST /api/chat branches", () => {
   it("400 on an invalid body", async () => {
-    const res = await post({ series: [], messages: [] });
+    const res = await post({ surface: "chart", view: { series: [] }, messages: [] });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("bad_request");
   });
 
+  it("400 when a chart surface sends no chart", async () => {
+    const res = await post({ surface: "overlay", messages: VALID_BODY.messages });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("bad_request");
+  });
+
+  it("the front page needs no chart: it reaches the provider check", async () => {
+    clearProviderEnv();
+    const res = await post({ surface: "home", messages: VALID_BODY.messages });
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("no_provider");
+  });
+
   it("400 on a malformed slug", async () => {
-    const res = await post({ ...VALID_BODY, series: [{ slug: "not a slug!" }] });
+    const res = await post({ ...VALID_BODY, view: { series: [{ slug: "not a slug!" }] } });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("bad_slug");
   });
@@ -78,7 +92,7 @@ describe("POST /api/chart-chat branches", () => {
   });
 
   it("413 when the message history is over the size cap", async () => {
-    const huge = "x".repeat(CHART_CHAT_MAX_INPUT_CHARS + 1);
+    const huge = "x".repeat(CHAT_MAX_INPUT_CHARS + 1);
     const res = await post({
       ...VALID_BODY,
       messages: [{ role: "user", parts: [{ type: "text", text: huge }] }],
@@ -121,10 +135,10 @@ describe("POST /api/chart-chat branches", () => {
   });
 });
 
-describe("GET /api/chart-chat availability", () => {
+describe("GET /api/chat availability", () => {
   it("reports disabled when the deployment has no key", async () => {
     clearProviderEnv();
-    const res = await GET(new NextRequest("http://localhost/api/chart-chat"));
+    const res = await GET(new NextRequest("http://localhost/api/chat"));
     expect(await res.json()).toEqual({ enabled: false, remaining: 0, limit: 0 });
   });
 
@@ -135,7 +149,7 @@ describe("GET /api/chart-chat availability", () => {
     vi.stubEnv("KV_REST_API_URL", "");
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
     await post(VALID_BODY);
-    const res = await GET(new NextRequest("http://localhost/api/chart-chat"));
+    const res = await GET(new NextRequest("http://localhost/api/chat"));
     expect(await res.json()).toEqual({ enabled: true, remaining: 0, limit: 5, siteLimited: true });
   });
 
@@ -143,7 +157,7 @@ describe("GET /api/chart-chat availability", () => {
     vi.stubEnv("ANTHROPIC_API_KEY", "sk-test");
     vi.stubEnv("CHAT_QUOTA_SECRET", "test-secret");
     vi.stubEnv("CHART_CHAT_DAILY_LIMIT", "5");
-    const res = await GET(new NextRequest("http://localhost/api/chart-chat"));
+    const res = await GET(new NextRequest("http://localhost/api/chat"));
     expect(await res.json()).toEqual({ enabled: true, remaining: 5, limit: 5 });
   });
 });
