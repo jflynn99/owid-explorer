@@ -199,8 +199,8 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
   return (
     <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="lg:col-start-1 lg:row-start-1">
-        <h1 className="text-2xl font-bold tracking-tight">{spec.title}</h1>
-        <div className="mt-4 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
+        <h1 className="font-display text-4xl font-semibold leading-tight">{spec.title}</h1>
+        <div className="mt-4 border-t border-gray-900 pt-2 dark:border-slate-100">
           <ChartRenderer spec={spec} data={data} columns={columns} population={population} />
           <CitationFooter columns={Object.values(columns)} />
         </div>
@@ -211,23 +211,23 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
           type="button"
           onClick={() => setControlsOpen((v) => !v)}
           aria-expanded={controlsOpen}
-          className="flex min-h-11 w-full items-center justify-between rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm font-medium shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 lg:hidden"
+          className="flex min-h-11 w-full items-center justify-between rounded-sm border border-gray-300 dark:border-slate-700 bg-paper dark:bg-slate-950 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 lg:hidden"
         >
           Chart controls
           <span aria-hidden="true">{controlsOpen ? "▲" : "▾"}</span>
         </button>
         <div className={`${controlsOpen ? "block" : "hidden"} space-y-6 lg:block`}>
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Series</h2>
+          <h2 className="border-t border-gray-900 pt-2 font-display text-base font-semibold dark:border-slate-100">Series</h2>
           <ul className="mt-2 space-y-2">
             {spec.series.map((ref, i) => (
               <li
                 key={seriesKey(ref) + ref.axis}
-                className="rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-sm shadow-sm"
+                className="rounded-sm border border-gray-200 dark:border-slate-800 bg-paper dark:bg-slate-950 p-2 text-sm"
               >
                 <div className="font-medium">{refLabel(ref, columns)}</div>
                 <div className="mt-1 flex items-center justify-between">
-                  <div className="flex overflow-hidden rounded border border-gray-300 dark:border-slate-700 text-xs">
+                  <div className="flex overflow-hidden rounded-sm border border-gray-300 dark:border-slate-700 text-xs">
                     {(["left", "right"] as const).map((axis) => (
                       <button
                         key={axis}
@@ -235,7 +235,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
                         onClick={() =>
                           updateSeries(spec.series.map((r, j) => (j === i ? { ...r, axis } : r)))
                         }
-                        className={`px-2 py-1 ${ref.axis === axis ? "bg-blue-600 text-white" : "bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800"}`}
+                        className={`px-2 py-1 ${ref.axis === axis ? "bg-gray-900 text-gray-50 dark:bg-slate-100 dark:text-slate-950" : "bg-paper dark:bg-slate-950 hover:bg-gray-100 dark:hover:bg-slate-900"}`}
                       >
                         {axis === "left" ? "L axis" : "R axis"}
                       </button>
@@ -260,7 +260,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
         </section>
 
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Transforms</h2>
+          <h2 className="border-t border-gray-900 pt-2 font-display text-base font-semibold dark:border-slate-100">Transforms</h2>
           <div className="mt-2 space-y-2 text-sm">
             <label className="flex items-center gap-2">
               <input
@@ -274,7 +274,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
                   type="number"
                   value={indexTransform.baseYear}
                   onChange={(e) => setBaseYear(Number(e.target.value))}
-                  className="w-20 rounded border border-gray-300 dark:border-slate-700 px-1 py-0.5 text-xs"
+                  className="w-20 rounded-sm border border-gray-300 dark:border-slate-700 px-1 py-0.5 text-xs"
                   aria-label="Base year"
                 />
               )}
@@ -320,7 +320,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
         </section>
 
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Countries</h2>
+          <h2 className="border-t border-gray-900 pt-2 font-display text-base font-semibold dark:border-slate-100">Countries</h2>
           <div className="mt-2 flex flex-wrap gap-1">
             {spec.entities.map((code) => {
               const name = entityOptions?.entities.find((e) => e.code === code)?.entity ?? code;
@@ -331,7 +331,7 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
                   onClick={() => toggleEntity(code)}
                   aria-label={`Remove ${name}`}
                   title="Remove"
-                  className="rounded-full bg-blue-50 dark:bg-blue-950 px-2 py-1 text-xs text-blue-700 dark:text-blue-300 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-700 dark:hover:text-red-300"
+                  className="rounded-sm border border-gray-300 px-2 py-1 text-xs text-gray-800 hover:border-red-400 hover:text-red-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-red-400 dark:hover:text-red-300"
                 >
                   {name} ×
                 </button>
@@ -341,25 +341,25 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
           <button
             type="button"
             onClick={() => setEntityPickerOpen((v) => !v)}
-            className="mt-2 min-h-11 lg:min-h-0 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+            className="mt-2 min-h-11 lg:min-h-0 rounded-sm border border-gray-300 dark:border-slate-700 bg-paper dark:bg-slate-950 px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-slate-900"
           >
             {entityPickerOpen ? "Close" : "Add country ▾"}
           </button>
           {entityPickerOpen && (
-            <div className="mt-1 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-lg">
+            <div className="mt-1 rounded-sm border border-gray-200 dark:border-slate-800 bg-paper dark:bg-slate-950 p-2">
               <input
                 type="search"
                 value={entityFilter}
                 onChange={(e) => setEntityFilter(e.target.value)}
                 placeholder="Filter…"
                 aria-label="Filter countries"
-                className="mb-2 w-full rounded border border-gray-300 dark:border-slate-700 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="mb-2 w-full rounded-sm border border-gray-300 dark:border-slate-700 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <ul className="max-h-48 overflow-auto text-sm">
                 {!entityOptions && <li className="px-2 py-1 text-gray-500 dark:text-slate-400">Loading…</li>}
                 {filteredEntities.map((e) => (
                   <li key={e.code}>
-                    <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 hover:bg-blue-50 dark:hover:bg-slate-800">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 hover:bg-gray-100 dark:hover:bg-slate-800">
                       <input
                         type="checkbox"
                         checked={spec.entities.includes(e.code)}
@@ -375,13 +375,13 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
         </section>
 
         <section>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">Time range</h2>
+          <h2 className="border-t border-gray-900 pt-2 font-display text-base font-semibold dark:border-slate-100">Time range</h2>
           <div className="mt-2 flex items-center gap-2 text-sm">
             <input
               type="number"
               value={years[0]}
               onChange={(e) => setYears([e.target.value, years[1]])}
-              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm min-h-11 lg:min-h-0"
+              className="w-20 rounded-sm border border-gray-300 dark:border-slate-700 px-2 py-1.5 min-h-11 lg:min-h-0"
               aria-label="From year"
             />
             <span className="text-gray-500 dark:text-slate-400">to</span>
@@ -389,13 +389,13 @@ export default function OverlayBuilder({ spec, data, columns, population }: Prop
               type="number"
               value={years[1]}
               onChange={(e) => setYears([years[0], e.target.value])}
-              className="w-20 rounded border border-gray-300 dark:border-slate-700 px-2 py-1.5 shadow-sm min-h-11 lg:min-h-0"
+              className="w-20 rounded-sm border border-gray-300 dark:border-slate-700 px-2 py-1.5 min-h-11 lg:min-h-0"
               aria-label="To year"
             />
             <button
               type="button"
               onClick={applyTime}
-              className="min-h-11 lg:min-h-0 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 shadow-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+              className="min-h-11 lg:min-h-0 rounded-sm border border-gray-300 dark:border-slate-700 bg-paper dark:bg-slate-950 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-slate-900"
             >
               Apply
             </button>

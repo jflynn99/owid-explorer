@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Inter } from "next/font/google";
+import { Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], display: "swap" });
+// Display serif for titles and big figures only. Body text uses the system
+// font stack (tailwind.config.ts), same as joeflynnpm.com.
+const display = Fraunces({ subsets: ["latin"], display: "swap", variable: "--font-display" });
 
 // Applies the saved (or system) theme before first paint to avoid a light
 // flash. Must stay in sync with ThemeToggle's storage key.
@@ -27,32 +29,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
       </head>
       <body
-        className={`${inter.className} min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 antialiased`}
+        className={`${display.variable} min-h-screen bg-paper font-sans text-gray-900 antialiased dark:bg-slate-950 dark:text-slate-100`}
       >
-        <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/70 backdrop-blur-md backdrop-saturate-150 dark:border-slate-800 dark:bg-slate-950/70">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-6">
-              <Link href="/" className="text-lg font-semibold tracking-tight">
-                OWID <span className="text-blue-600 dark:text-blue-400">Explorer</span>
+        <header className="mx-auto max-w-5xl px-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b-2 border-gray-900 py-3 dark:border-slate-100">
+            <Link href="/" className="font-display text-xl font-semibold tracking-tight">
+              OWID Explorer
+            </Link>
+            <nav className="flex items-center gap-5 text-sm">
+              <Link href="/overlay" className="py-1 text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100">
+                Overlay
               </Link>
-              <Link href="/overlay" className="py-1 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
-                Overlay builder
-              </Link>
-              <Link href="/agent" className="py-1 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
+              <Link href="/agent" className="py-1 text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100">
                 Agent
               </Link>
-            </div>
-            <div className="flex items-center gap-4">
               <a
                 href="https://ourworldindata.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden text-sm text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 sm:block"
+                className="hidden py-1 text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100 sm:block"
               >
                 Data: Our World in Data
               </a>
               <ThemeToggle />
-            </div>
+            </nav>
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>

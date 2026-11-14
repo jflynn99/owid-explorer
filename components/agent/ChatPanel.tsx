@@ -36,7 +36,7 @@ function SuggestionChips({
           type="button"
           disabled={disabled}
           onClick={() => onPick(s)}
-          className="rounded-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-gray-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
+          className="rounded-sm border border-gray-300 dark:border-slate-700 bg-paper dark:bg-slate-950 px-3 py-1.5 text-xs text-gray-600 dark:text-slate-300 hover:border-blue-300 dark:hover:border-blue-700 hover:text-blue-700 dark:hover:text-blue-300 disabled:opacity-50"
         >
           {s}
         </button>
@@ -72,14 +72,14 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
   }
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
+    <div className="flex max-w-3xl flex-col gap-4">
       {!serverConfigured && <KeyManager onChange={setConfig} />}
 
       <div className="min-h-64 space-y-4" role="log" aria-live="polite" aria-busy={busy}>
         {messages.length === 0 && (
           <div className="pt-4">
             <p className="text-sm text-gray-500 dark:text-slate-400">
-              Ask for any data OWID publishes — the agent finds it, combines it, renders a chart
+              Ask for any data OWID publishes. The agent finds it, combines it, renders a chart
               with citations, and can explain it using OWID&apos;s own articles.
             </p>
             <SuggestionChips items={SUGGESTIONS} onPick={submit} disabled={!canChat} />
@@ -89,7 +89,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
         {messages.map((message) => (
           <div key={message.id}>
             {message.role === "user" ? (
-              <div className="ml-auto w-fit max-w-[85%] rounded-2xl bg-blue-600 px-4 py-2 text-sm text-white">
+              <div className="ml-auto w-fit max-w-[85%] border-l-2 border-blue-500 bg-gray-100 px-4 py-2 text-sm text-gray-900 dark:bg-slate-900 dark:text-slate-100">
                 {message.parts.map((part, i) =>
                   part.type === "text" ? <span key={i}>{part.text}</span> : null
                 )}
@@ -184,13 +184,13 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
           placeholder={canChat ? "Ask about any OWID data…" : "Add a key above to enable the agent"}
           aria-label="Ask about any OWID data"
           disabled={!canChat}
-          className="flex-1 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 dark:disabled:bg-slate-900"
+          className="flex-1 rounded-sm border border-gray-300 dark:border-slate-700 bg-paper dark:bg-slate-950 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 dark:disabled:bg-slate-900"
         />
         {busy ? (
           <button
             type="button"
             onClick={() => stop()}
-            className="rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+            className="rounded-sm border border-gray-300 dark:border-slate-700 bg-paper dark:bg-slate-950 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-slate-900"
           >
             Stop
           </button>
@@ -198,7 +198,7 @@ export default function ChatPanel({ serverConfigured }: { serverConfigured: bool
           <button
             type="submit"
             disabled={!canChat || !input.trim()}
-            className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-sm px-4 py-2.5 text-sm bg-gray-900 text-gray-50 hover:bg-gray-700 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-slate-300 disabled:opacity-50"
           >
             Send
           </button>
