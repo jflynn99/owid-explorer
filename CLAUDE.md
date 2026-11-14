@@ -55,8 +55,10 @@ summary.
   the compose_chart tool and the client renders them (`components/agent/SpecChart`).
   Client keys arrive as x-llm-provider/x-llm-key headers — in-memory only, never
   logged. Ollama config comes from env only, never client headers (SSRF).
-- Default models: `claude-haiku-4-5` (Anthropic), `gpt-4o-mini` (OpenAI);
-  override with `LLM_MODEL`.
+- Default models: `claude-haiku-5-5` (Anthropic), `gpt-4o-mini` (OpenAI);
+  override with `LLM_MODEL`. Haiku 5.5 thinks by default and thinking counts
+  toward `maxOutputTokens`, so don't shrink the caps in `lib/agent/limits.ts`
+  to answer-size.
 - Chart chat (`/api/chart-chat`, `components/agent/ChartChat.tsx`): on chart AND
   overlay pages, framed as a free trial. Body takes `series: [{slug, column?}]`
   (≤4) plus optional transforms; context built server-side in
@@ -66,6 +68,13 @@ summary.
   would also make the full agent server-funded (don't, on public deploys).
   Daily quota = HMAC-signed cookie (`lib/agent/quota.ts`), default 5/day
   (`CHART_CHAT_DAILY_LIMIT`). A saved BYO key bypasses the quota.
+- Cost limits on the chat routes: a site-wide daily cap across visitors
+  (`lib/agent/globalCap.ts`, `CHART_CHAT_GLOBAL_DAILY_LIMIT`, default 200; exact
+  only with a KV/Upstash store, otherwise per server instance), and per-request
+  input/output ceilings (`lib/agent/limits.ts`). Both routes pass client history
+  through `prepareMessages`, which also strips reasoning parts from earlier
+  turns — replayed thinking fails once history is trimmed or the system prompt
+  changes. Keep new chat routes on the same path.
 
 ## Verification
 
