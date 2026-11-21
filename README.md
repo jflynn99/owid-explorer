@@ -1,4 +1,6 @@
-# OWID Explorer
+# Really Important Metrics
+
+Live at **[explorer.joeflynnpm.com](https://explorer.joeflynnpm.com)**. An independent project, not affiliated with or endorsed by Our World in Data.
 
 Explore, combine and explain [Our World in Data](https://ourworldindata.org) —
 interactive charts with citations, combinable overlays, and an optional

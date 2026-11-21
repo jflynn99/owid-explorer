@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="mx-auto max-w-5xl px-4">
           <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b-2 border-gray-900 py-3 dark:border-slate-100">
             <Link href="/" className="font-display text-xl font-semibold tracking-tight">
-              OWID Explorer
+              {SITE_NAME}
             </Link>
             <nav className="flex items-center gap-5 text-sm">
               <Link href="/overlay" className="py-1 text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-100">
@@ -59,8 +59,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
         <footer className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-6 text-xs text-gray-500 dark:border-slate-800 dark:text-slate-400">
           <span>
-            Charts rendered independently from OWID&apos;s public APIs. OWID content is CC BY;
-            underlying third-party data may carry its own terms.
+            Data from <a href="https://ourworldindata.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-600 dark:hover:text-slate-300">Our World in Data</a>, CC BY.
+            An independent project, not affiliated with or endorsed by OWID. Charts are rendered
+            independently; underlying third-party data may carry its own terms. Built by{" "}
+            <a href="https://joeflynnpm.com" className="underline hover:text-gray-600 dark:hover:text-slate-300">Joe Flynn</a>.
           </span>
           <a
             href="https://github.com/jflynn99/owid-explorer"
