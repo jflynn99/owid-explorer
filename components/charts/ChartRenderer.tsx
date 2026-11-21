@@ -11,6 +11,7 @@ import type { PopulationLookup } from "@/lib/transforms/perCapita";
 import type { ColumnMeta, EntitySeries } from "@/lib/owid/types";
 import { entityColorAssigner, seriesDash } from "@/lib/chartColors";
 import { useIsDark } from "@/lib/useIsDark";
+import { breakLongGaps } from "@/lib/gaps";
 import EChart from "./EChart";
 
 // Transforms change what the y-axis means — derive its label accordingly.
@@ -91,15 +92,19 @@ export default function ChartRenderer({
         if (!legendEntities.has(entitySeries.entity)) {
           legendEntities.set(entitySeries.entity, lineColor);
         }
+        // Long gaps are left blank rather than bridged (lib/gaps.ts), and a
+        // point with no neighbour either side gets a dot so it stays visible.
+        const { data: plotPoints, isolated } = breakLongGaps(entitySeries.points);
         echartsSeries.push({
           type: "line",
           name,
           yAxisIndex: ref.axis === "right" ? 1 : 0,
-          // A line needs two points; an isolated point must show its symbol
-          // or the series is invisible
-          showSymbol: entitySeries.points.length < 2,
+          showSymbol: isolated.size > 0,
+          symbol: "circle",
+          symbolSize: (_value: unknown, params: { dataIndex: number }) =>
+            isolated.has(params.dataIndex) ? 5 : 0,
           connectNulls: false, // gaps stay gaps — no interpolation
-          data: entitySeries.points,
+          data: plotPoints,
           lineStyle: { width: 2, type: seriesDash(refIndex) ?? "solid" },
           // Hovering a line keeps it in colour and fades the rest.
           emphasis: { focus: "series", lineStyle: { width: 2.5 } },
