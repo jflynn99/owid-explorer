@@ -27,11 +27,26 @@ describe("validateSpec", () => {
     expect(validateSpec(VALID)).toEqual({ ok: true, spec: VALID });
   });
 
-  it("rejects a right-axis series without axes.right", () => {
-    const bad = { ...VALID, axes: { left: {} } };
-    const result = validateSpec(bad);
+  it("adds axes.right when a series targets the right axis without it", () => {
+    const result = validateSpec({ ...VALID, axes: { left: {} } });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.spec.axes.right).toEqual({});
+  });
+
+  it("fills in v and axes when a model leaves them out", () => {
+    const { v: _v, axes: _axes, ...rest } = VALID;
+    const result = validateSpec(rest);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.spec.v).toBe(1);
+      expect(result.spec.axes).toEqual({ left: {}, right: {} });
+    }
+  });
+
+  it("still rejects a series without a column", () => {
+    const result = validateSpec({ ...VALID, series: [{ slug: "life-expectancy", axis: "left" }] });
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.errors.join(" ")).toMatch(/right axis/);
+    if (!result.ok) expect(result.errors.join(" ")).toMatch(/series\.0\.column/);
   });
 
   it("rejects inverted time ranges", () => {

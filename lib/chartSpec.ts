@@ -27,16 +27,20 @@ export const annotationSchema = z.object({
   text: z.string().max(300),
 });
 
+// Defaults on v and axes forgive the two fields a model most often leaves
+// out; neither carries information the rest of the spec doesn't.
 export const chartSpecSchema = z
   .object({
-    v: z.literal(1),
+    v: z.literal(1).default(1),
     title: z.string().min(1).max(300),
     series: z.array(seriesRefSchema).min(1).max(8),
     transforms: z.array(transformSchema).max(4).default([]),
-    axes: z.object({
-      left: axisConfigSchema,
-      right: axisConfigSchema.optional(),
-    }),
+    axes: z
+      .object({
+        left: axisConfigSchema.default({}),
+        right: axisConfigSchema.optional(),
+      })
+      .default({ left: {} }),
     entities: z.array(z.string().min(1).max(100)).min(1).max(50),
     timeRange: z.tuple([z.number().int(), z.number().int()]),
     annotations: z.array(annotationSchema).max(20).optional(),
@@ -50,14 +54,8 @@ export const chartSpecSchema = z
         path: ["timeRange"],
       });
     }
-    const usesRight = spec.series.some((s) => s.axis === "right");
-    if (usesRight && !spec.axes.right) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "a series targets the right axis but axes.right is not configured",
-        path: ["axes", "right"],
-      });
-    }
+    // A series on the right axis without axes.right is fixed in validateSpec,
+    // not rejected: the intent is unambiguous.
     const hasZScore = spec.transforms.some((t) => t.kind === "zScore");
     const hasLog = spec.axes.left.log || spec.axes.right?.log;
     if (hasZScore && hasLog) {
@@ -80,7 +78,12 @@ export type SpecValidation =
 
 export function validateSpec(input: unknown): SpecValidation {
   const result = chartSpecSchema.safeParse(input);
-  if (result.success) return { ok: true, spec: result.data };
+  if (result.success) {
+    const spec = result.data;
+    const usesRight = spec.series.some((s) => s.axis === "right");
+    if (usesRight && !spec.axes.right) spec.axes = { ...spec.axes, right: {} };
+    return { ok: true, spec };
+  }
   return {
     ok: false,
     errors: result.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`),

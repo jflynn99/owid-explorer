@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import ThemeToggle from "@/components/ThemeToggle";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 // Display serif for titles and big figures only. Body text uses the system
@@ -14,10 +15,13 @@ const display = Fraunces({ subsets: ["latin"], display: "swap", variable: "--fon
 const THEME_INIT = `(function(){try{var t=localStorage.getItem("owid-explorer.theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}})()`;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "OWID Explorer",
-    template: "%s · OWID Explorer",
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
   },
+  openGraph: { siteName: SITE_NAME, type: "website" },
+  twitter: { card: "summary_large_image" },
   description:
     "Explore, combine, and question Our World in Data: interactive charts, overlays, and a chat that draws the chart you ask for.",
 };

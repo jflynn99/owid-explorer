@@ -3,9 +3,26 @@
 // The conversation itself: what was asked, what the model did, and what it
 // said. Shared by every surface; only how a composed chart appears differs.
 
-import Markdown from "@/components/agent/Markdown";
-import SpecChart from "@/components/agent/SpecChart";
+import { lazy, Suspense } from "react";
 import type { ExplorerChat, LoosePart } from "./useExplorerChat";
+
+// Most visitors never send a message, so the markdown renderer and the inline
+// chart (which pulls in ECharts) load on the first answer, not with the page.
+const Markdown = lazy(() => import("@/components/agent/Markdown"));
+const SpecChart = lazy(() => import("@/components/agent/SpecChart"));
+
+// Streamed text shows straight away while the renderer loads.
+function AnswerText({ text }: { text: string }) {
+  return (
+    <Suspense
+      fallback={
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-800 dark:text-slate-200">{text}</p>
+      }
+    >
+      <Markdown>{text}</Markdown>
+    </Suspense>
+  );
+}
 
 interface ArticleRef {
   title: string;
@@ -55,7 +72,13 @@ function ToolPart({ part, inlineCharts }: { part: LoosePart; inlineCharts: boole
     if (part.state !== "output-available") return null;
     if (!(part.output as { ok?: boolean } | undefined)?.ok) return null;
     // On the overlay builder the chart on the page has already been replaced.
-    return inlineCharts ? <SpecChart spec={part.input} /> : <p className={note}>Chart updated.</p>;
+    return inlineCharts ? (
+      <Suspense fallback={<p className={note}>Drawing the chart…</p>}>
+        <SpecChart spec={part.input} />
+      </Suspense>
+    ) : (
+      <p className={note}>Chart updated.</p>
+    );
   }
   if (part.type === "tool-explain_chart") {
     if (pending) return <p className={note}>Reading OWID’s articles…</p>;
@@ -129,7 +152,7 @@ export default function ChatTranscript({
               {(message.parts as LoosePart[]).map((part, i) =>
                 part.type === "text" ? (
                   part.text?.trim() ? (
-                    <Markdown key={i}>{part.text}</Markdown>
+                    <AnswerText key={i} text={part.text} />
                   ) : null
                 ) : part.type.startsWith("tool-") ? (
                   <ToolPart key={i} part={part} inlineCharts={inlineCharts} />
@@ -142,7 +165,11 @@ export default function ChatTranscript({
       {busy && <p className={note}>Thinking…</p>}
       {emptyReply && (
         <p className="text-sm text-gray-700 dark:text-slate-300">
-          No answer came back for that one. Try asking it another way.
+          No answer came back for that one. Try asking it another way, or{" "}
+          <button type="button" onClick={retry} className="font-medium underline">
+            try again
+          </button>
+          .
         </p>
       )}
       {errorText && (
