@@ -9,7 +9,8 @@ summary.
 - Phase 1 (chart viewer): done
 - Phase 2 (overlays + transforms): done
 - Phase 3 (agent): done; since folded into the site-wide chat (see below)
-- Phase 4 (publish): extracted to this standalone repo; README GIFs + blog post pending
+- Phase 4 (publish): extracted to this standalone repo; live at explorer.joeflynnpm.com as
+  "Really Important Metrics"; README screenshots done; blog post (joeflynnpm.com) pending
 - Chart chat (SPEC.md §7a) and v3 (quality + agent depth): done
 - v4 (SPEC.md "v4" section): done — the Almanac design; one chat on the front
   page, chart pages, and the overlay builder in place of the agent page; the
