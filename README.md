@@ -6,7 +6,9 @@ Explore, combine and explain [Our World in Data](https://ourworldindata.org) —
 interactive charts with citations, combinable overlays, and an optional
 natural-language agent with a bring-your-own-LLM model.
 
-**Status: chart viewer, overlay engine, and chat are built.** See
+![The front page: in 1800, 43% of children died before they turned five; now it is 3.7%](docs/images/home.png)
+
+**Status: chart viewer, overlay engine, chat, and share images are built.** See
 [SPEC.md](./SPEC.md) for the full plan.
 
 - Search thousands of OWID charts and open any of them
@@ -19,6 +21,14 @@ natural-language agent with a bring-your-own-LLM model.
   code), and explains them grounded in OWID's own cited articles
 - Every chart shows OWID's citation, unit and timespan metadata
 - Works entirely without an LLM — the agent is an enhancement, not a dependency
+
+| A chart, with its citation | Two series overlaid |
+| --- | --- |
+| ![Life expectancy by continent: early readings as dots, annual lines from 1950](docs/images/chart.png) | ![Life expectancy against GDP per capita on two axes](docs/images/overlay.png) |
+
+Every chart and overlay link carries its own share image, drawn from the live data:
+
+![Share card for a life expectancy link](docs/images/share-card.png)
 
 ## The chat and who pays for it
 
