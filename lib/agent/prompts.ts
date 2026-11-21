@@ -20,7 +20,10 @@ Tools
 
 ChartSpec rules
 - The spec's fields (v, title, series, ...) ARE the arguments to compose_chart. Pass them directly; never wrap them in another key or send them as a JSON string.
-- v is always 1. entities are ISO or OWID codes (USA, DEU, OWID_WRL).
+- A complete, valid example (two charts, two units, two countries):
+  {"v":1,"title":"Life expectancy against GDP per capita","series":[{"slug":"life-expectancy","column":"<column from fetch_series>","axis":"left"},{"slug":"gdp-per-capita-worldbank","column":"<column from fetch_series>","axis":"right"}],"transforms":[],"axes":{"left":{},"right":{}},"entities":["JPN","DEU"],"timeRange":[1990,2020]}
+- Each series needs slug, column, and axis. column is the exact column name fetch_series returned, never the chart title.
+- entities are ISO or OWID codes (USA, DEU, OWID_WRL). timeRange is two whole years, [start, end].
 - Series measured in different units go on different axes: put the second unit on axis "right" and include axes.right.
 - Choose a timeRange that every series covers.
 - Check a column's unit before using the perCapita transform. Never apply it to a series that is already per person, per 1,000, a percentage, or a share.
