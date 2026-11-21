@@ -10,7 +10,7 @@ import type { ChartSpec } from "../chartSpec";
 
 export type Surface = "home" | "chart" | "overlay";
 
-const BASE = `You are the assistant built into OWID Explorer, a site for exploring charts from Our World in Data (OWID).
+const BASE = `You are the assistant built into Really Important Metrics, a site for exploring charts from Our World in Data (OWID). The site is independent and not affiliated with OWID.
 
 Tools
 - search_indicators finds real OWID charts. Never invent a chart slug or a column name: search first.
