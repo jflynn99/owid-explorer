@@ -142,7 +142,11 @@ export default function ChatTranscript({
       {busy && <p className={note}>Thinking…</p>}
       {emptyReply && (
         <p className="text-sm text-gray-700 dark:text-slate-300">
-          No answer came back for that one. Try asking it another way.
+          No answer came back for that one. Try asking it another way, or{" "}
+          <button type="button" onClick={retry} className="font-medium underline">
+            try again
+          </button>
+          .
         </p>
       )}
       {errorText && (
