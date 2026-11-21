@@ -4,7 +4,7 @@ Live at **[explorer.joeflynnpm.com](https://explorer.joeflynnpm.com)**. An indep
 
 Explore, combine and explain [Our World in Data](https://ourworldindata.org) —
 interactive charts with citations, combinable overlays, and an optional
-natural-language agent with a bring-your-own-LLM model.
+natural-language agent with an optional bring-your-own-LLM model.
 
 ![The front page: in 1800, 43% of children died before they turned five; now it is 3.7%](docs/images/home.png)
 
@@ -20,7 +20,7 @@ natural-language agent with a bring-your-own-LLM model.
   indicators, composes charts as validated declarative specs (it never writes chart
   code), and explains them grounded in OWID's own cited articles
 - Every chart shows OWID's citation, unit and timespan metadata
-- Works entirely without an LLM — the agent is an enhancement, not a dependency
+- Works entirely without an LLM — the agent is an extra
 
 | A chart, with its citation | Two series overlaid |
 | --- | --- |
@@ -32,7 +32,7 @@ Every chart and overlay link carries its own share image, drawn from the live da
 
 ## The chat and who pays for it
 
-Charts, search, and overlays need no key at all. The chat needs one, from either side:
+Charts, search, and overlays need no key at all. The chat needs one after 5 questions:
 
 1. **The deployment's key.** Set `ANTHROPIC_API_KEY` (default model `claude-haiku-5-5`)
    or `OPENAI_API_KEY` (default `gpt-4o-mini`) and every visitor can ask, within
