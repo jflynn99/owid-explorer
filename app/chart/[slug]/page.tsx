@@ -21,12 +21,22 @@ function parseTimeParam(time?: string): [number, number] | undefined {
   return m ? [Number(m[1]), Number(m[2])] : undefined;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   if (!isValidSlug(slug)) return {};
+  const { country, time } = await searchParams;
   try {
     const meta = await fetchChartMetadata(slug);
-    return { title: meta.chart.title, description: meta.chart.subtitle };
+    // The share image draws the same selection the link opens.
+    const image = new URLSearchParams({ chart: slug });
+    if (country) image.set("country", country);
+    if (time) image.set("time", time);
+    const description = meta.chart.subtitle || `${meta.chart.title}, from Our World in Data.`;
+    return {
+      title: meta.chart.title,
+      description,
+      openGraph: { title: meta.chart.title, description, images: [{ url: `/og?${image}`, width: 1200, height: 630 }] },
+    };
   } catch {
     return {};
   }

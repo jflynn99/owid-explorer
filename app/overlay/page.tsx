@@ -12,7 +12,24 @@ import type { ColumnMeta, EntitySeries } from "@/lib/owid/types";
 import OverlayBuilder from "@/components/overlay/OverlayBuilder";
 import OverlayStart from "@/components/overlay/OverlayStart";
 
-export const metadata: Metadata = { title: "Overlay builder" };
+export async function generateMetadata(props: {
+  searchParams: Promise<{ s?: string }>;
+}): Promise<Metadata> {
+  const { s } = await props.searchParams;
+  const decoded = s ? decodeSpec(s) : null;
+  if (!s || !decoded?.ok) return { title: "Overlay builder" };
+  const { title, timeRange } = decoded.spec;
+  const description = `${title}, ${timeRange[0]}–${timeRange[1]}. Charts drawn from Our World in Data.`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: `/og?s=${encodeURIComponent(s)}`, width: 1200, height: 630 }],
+    },
+  };
+}
 
 export default async function OverlayPage(props: {
   searchParams: Promise<{ s?: string }>;
